@@ -1,4 +1,4 @@
-namespace ProjetLivInParis
+namespace TestLinInParis
 {
     internal static class Program
     {
