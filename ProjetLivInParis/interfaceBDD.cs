@@ -1,154 +1,120 @@
 ﻿using System;
+using System.Data;
 using MySql.Data.MySqlClient;
 
 namespace Project_LivInParis
 {
-    /// <summary>
-    /// Fournit une interface pour se connecter à la base de données, insérer et afficher des utilisateurs.
-    /// </summary>
     public class InterfaceBDD
     {
-        private MySqlConnection maConnexion;
+        private MySqlConnection connexion;
 
-        /// <summary>
-        /// Initialise une nouvelle instance de la classe InterfaceBDD.
-        /// </summary>
-        public InterfaceBDD()
-        {
-            maConnexion = null;
-        }
+        private readonly string connectionString =
+            "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
 
-        /// <summary>
-        /// Établit la connexion à la base de données en utilisant la chaîne de connexion spécifiée.
-        /// Affiche un message de succès ou d'erreur en cas d'échec.
-        /// </summary>
         public void Connexion()
         {
-            try
-            {
-                string connectionString = "SERVER=127.0.0.1;PORT=3306;" +
-                                          "DATABASE=livinparis;" +
-                                          "UID=root;PASSWORD=root;";
-                maConnexion = new MySqlConnection(connectionString);
-                maConnexion.Open();
-                Console.WriteLine("Connexion réussie !");
-            }
-            catch (MySqlException e)
-            {
-                Console.WriteLine("Erreur de connexion : " + e.ToString());
-            }
+            connexion = new MySqlConnection(connectionString);
+            connexion.Open();
         }
 
-        /// <summary>
-        /// Insère un nouvel utilisateur dans la table 'identite' de la base de données.
-        /// </summary>
-        /// <param name="nom">Nom de l'utilisateur.</param>
-        /// <param name="prenom">Prénom de l'utilisateur.</param>
-        /// <param name="adresse">Adresse de l'utilisateur.</param>
-        /// <param name="telephone">Téléphone de l'utilisateur.</param>
-        /// <param name="email">Email de l'utilisateur.</param>
-        /// <param name="motDePasse">Mot de passe de l'utilisateur.</param>
-        public void InsererUtilisateur(string nom, string prenom, string adresse, string telephone, string email, string motDePasse)
-        {
-            if (maConnexion == null || maConnexion.State != System.Data.ConnectionState.Open)
-            {
-                Console.WriteLine("La connexion n'est pas ouverte.");
-                return;
-            }
-
-            string query = "INSERT INTO identite (Nom, Prenom, Adresse, Telephone, Email, MotDePasse) " +
-                           "VALUES (@nom, @prenom, @adresse, @telephone, @email, @motDePasse)";
-
-            using (MySqlCommand command = new MySqlCommand(query, maConnexion))
-            {
-                command.Parameters.AddWithValue("@nom", nom);
-                command.Parameters.AddWithValue("@prenom", prenom);
-                command.Parameters.AddWithValue("@adresse", adresse);
-                command.Parameters.AddWithValue("@telephone", telephone);
-                command.Parameters.AddWithValue("@email", email);
-                command.Parameters.AddWithValue("@motDePasse", motDePasse);
-
-                int rowsAffected = command.ExecuteNonQuery();
-                Console.WriteLine($"{rowsAffected} utilisateur(s) inséré(s).");
-            }
-        }
-
-        /// <summary>
-        /// Affiche dans la console la liste de tous les utilisateurs présents dans la table 'identite'.
-        /// </summary>
-        public void AfficherUtilisateurs()
-        {
-            if (maConnexion == null || maConnexion.State != System.Data.ConnectionState.Open)
-            {
-                Console.WriteLine("La connexion n'est pas ouverte.");
-                return;
-            }
-
-            string query = "SELECT * FROM identite";
-
-            using (MySqlCommand command = new MySqlCommand(query, maConnexion))
-            using (MySqlDataReader reader = command.ExecuteReader())
-            {
-                Console.WriteLine("Liste des utilisateurs :");
-
-                while (reader.Read())
-                {
-                    string id = reader["ID"].ToString();
-                    string prenom = reader["Prenom"].ToString();
-                    string nom = reader["Nom"].ToString();
-                    string adresse = reader["Adresse"].ToString();
-                    string telephone = reader["Telephone"].ToString();
-                    string email = reader["Email"].ToString();
-
-                    Console.WriteLine($"{id} {prenom} {nom} - {adresse}, {telephone}, {email}");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Ferme la connexion à la base de données si elle est ouverte.
-        /// </summary>
         public void FermerConnexion()
         {
-            if (maConnexion != null && maConnexion.State == System.Data.ConnectionState.Open)
-            {
-                maConnexion.Close();
-                Console.WriteLine("Connexion fermée.");
-            }
+            connexion?.Close();
         }
 
         /// <summary>
-        /// Exécute l'interface de gestion de la base de données.
-        /// Cette méthode se connecte à la BDD, affiche la liste des utilisateurs,
-        /// demande à l'utilisateur de saisir de nouvelles informations, insère ces données,
-        /// réaffiche la liste actualisée et ferme la connexion.
+        /// Insère un utilisateur dans la table identite et retourne l'ID inséré.
         /// </summary>
-        public void Execution()
+        public int InsererUtilisateur(string nom, string prenom, string adresse, string telephone, string email, string motDePasse)
         {
-            Connexion();
-            AfficherUtilisateurs();
+            string sql = @"INSERT INTO identite (Nom, Prenom, Adresse, Telephone, Email, MotDePasse)
+                           VALUES (@Nom, @Prenom, @Adresse, @Telephone, @Email, @MotDePasse);
+                           SELECT LAST_INSERT_ID();";
 
-            // Saisie utilisateur
-            Console.Write("Nom : ");
-            string nom = Console.ReadLine();
-            Console.Write("Prénom : ");
-            string prenom = Console.ReadLine();
-            Console.Write("Adresse : ");
-            string adresse = Console.ReadLine();
-            Console.Write("Téléphone : ");
-            string telephone = Console.ReadLine();
-            Console.Write("Email : ");
-            string email = Console.ReadLine();
-            Console.Write("Mot de passe : ");
-            string motDePasse = Console.ReadLine();
+            using var cmd = new MySqlCommand(sql, connexion);
+            cmd.Parameters.AddWithValue("@Nom", nom);
+            cmd.Parameters.AddWithValue("@Prenom", prenom);
+            cmd.Parameters.AddWithValue("@Adresse", adresse);
+            cmd.Parameters.AddWithValue("@Telephone", telephone);
+            cmd.Parameters.AddWithValue("@Email", email);
+            cmd.Parameters.AddWithValue("@MotDePasse", motDePasse);
 
-            // Insertion dans la base de données
-            InsererUtilisateur(nom, prenom, adresse, telephone, email, motDePasse);
-
-            // Affichage des utilisateurs mis à jour
-            AfficherUtilisateurs();
-
-            FermerConnexion();
+            int insertedId = Convert.ToInt32(cmd.ExecuteScalar());
+            return insertedId;
         }
+
+        /// <summary>
+        /// Insère un client lié à l'utilisateur (via ID).
+        /// </summary>
+        public void InsererClient(int id, string typeClient, string nomEntreprise, string referent)
+        {
+            string sql = @"INSERT INTO Client (ID, TypeClient, NomEntreprise, Referent)
+                           VALUES (@ID, @TypeClient, @NomEntreprise, @Referent);";
+
+            using var cmd = new MySqlCommand(sql, connexion);
+            cmd.Parameters.AddWithValue("@ID", id);
+            cmd.Parameters.AddWithValue("@TypeClient", typeClient);
+            cmd.Parameters.AddWithValue("@NomEntreprise", string.IsNullOrWhiteSpace(nomEntreprise) ? (object)DBNull.Value : nomEntreprise);
+            cmd.Parameters.AddWithValue("@Referent", string.IsNullOrWhiteSpace(referent) ? (object)DBNull.Value : referent);
+
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Insère un cuisinier lié à l'utilisateur (via ID).
+        /// </summary>
+        public void InsererCuisinier(int id)
+        {
+            string sql = @"INSERT INTO Cuisinier (ID) VALUES (@ID);";
+
+            using var cmd = new MySqlCommand(sql, connexion);
+            cmd.Parameters.AddWithValue("@ID", id);
+            cmd.ExecuteNonQuery();
+        }
+        public void AfficherUtilisateurs()
+        {
+            string sql = "SELECT * FROM identite";
+
+            using var cmd = new MySqlCommand(sql, connexion);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Console.WriteLine($"ID: {reader["ID"]}, Nom: {reader["Nom"]}, Prénom: {reader["Prenom"]}, Email: {reader["Email"]}");
+            }
+        }
+        public class Utilisateur
+        {
+            public int ID { get; set; }
+            public string Nom { get; set; }
+            public string Prenom { get; set; }
+            public string Email { get; set; }
+        }
+        public List<Utilisateur> RecupererUtilisateurs()
+        {
+            var liste = new List<Utilisateur>();
+
+            string sql = "SELECT ID, Nom, Prenom, Email FROM identite ORDER BY ID";
+
+            using var cmd = new MySqlCommand(sql, connexion);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var user = new Utilisateur
+                {
+                    ID = reader.GetInt32("ID"),
+                    Nom = reader.GetString("Nom"),
+                    Prenom = reader.GetString("Prenom"),
+                    Email = reader.GetString("Email")
+                };
+                liste.Add(user);
+            }
+
+            return liste;
+        }
+
+
+
     }
 }

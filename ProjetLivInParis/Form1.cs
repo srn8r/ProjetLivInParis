@@ -4,11 +4,18 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using Project_LivInParis;
+using ProjetLivInParis;
+
 
 namespace TestLinInParis
 {
+
     public partial class Form1 : Form
     {
+        private Label lblTitre;
+        private Label lblSousTitre;
+        private Button btnInscrire, btnVoirUtilisateurs, btnCommander, btnAfficherGraphe;
+
         private StationManager stationManager;
         private Graphe<Station> graphe;
         private Station selectedStation1 = null;
@@ -21,6 +28,10 @@ namespace TestLinInParis
         private PointF offset = new PointF(0, 0);
         private bool isDragging = false;
         private Point lastMousePos;
+        private ComboBox algoSelector;
+        private TextBox searchBox;
+        private Button searchButton;
+
 
 
         private Dictionary<string, Color> couleursParLigne = new Dictionary<string, Color>()
@@ -30,47 +41,95 @@ namespace TestLinInParis
             { "9", Color.Olive }, { "10", Color.DarkGoldenrod }, { "11", Color.DarkOrange },
             { "12", Color.SeaGreen }, { "13", Color.Teal }, { "14", Color.DarkViolet },
         };
-        private ComboBox algoSelector; /* Pour choisir l'algo */
-        private TextBox searchBox; /* Pour sélectionner la station */
-        private Button searchButton;
-
 
         public Form1()
         {
             InitializeComponent();
-            // Barre de recherche
-            searchBox = new TextBox
+            this.Text = "LivInParis";
+            this.Size = new Size(900, 700);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.BackColor = Color.LightCoral;
+
+            // Panel pour le graphe
+            panel1 = new Panel
             {
-                Width = 200,
-                Location = new Point(this.ClientSize.Width - 360, 10),
-                Anchor = AnchorStyles.Top | AnchorStyles.Right
+                Dock = DockStyle.Fill,
+                BackColor = Color.White,
+                Visible = false
             };
-            this.Controls.Add(searchBox);
-            searchBox.BringToFront();
-            searchButton = new Button
+            this.Controls.Add(panel1);
+            
+
+            // Titre
+            lblTitre = new Label
             {
-                Text = "Rechercher",
-                Location = new Point(this.ClientSize.Width - 360, 30),
-                Width = 200,
-                Anchor = AnchorStyles.Top | AnchorStyles.Right
+                Text = "LivInParis",
+                Font = new Font("Segoe UI", 24, FontStyle.Bold),
+                AutoSize = true,
             };
-            searchButton.Click += SearchButton_Click;
-            this.Controls.Add(searchButton);
-            searchButton.BringToFront();
+            this.Controls.Add(lblTitre);
+            lblTitre.BringToFront();
+
+            // Sous-titre
+            lblSousTitre = new Label
+            {
+                Text = "Livraison de vos commandes dans Paris",
+                Font = new Font("Segoe UI", 12, FontStyle.Regular),
+                AutoSize = true
+            };
+            this.Controls.Add(lblSousTitre);
+            lblSousTitre.BringToFront();
+
+            // Boutons
+            btnInscrire = new Button { Text = "S'inscrire", Size = new Size(200, 40) };
+            btnInscrire.Click += BtnOuvrirForm2_Click;
+            btnInscrire.BringToFront();
+
+            btnVoirUtilisateurs = new Button { Text = "Voir les utilisateurs", Size = new Size(200, 40) };
+            btnVoirUtilisateurs.Click += BtnVoirUtilisateurs_Click;
+            btnVoirUtilisateurs.BringToFront();
+
+            btnCommander = new Button { Text = "Passer une commande", Size = new Size(200, 40),
+                Enabled = false };// désactive le clic
+            btnCommander.BringToFront();
+
+            btnAfficherGraphe = new Button { Text = "Afficher le graphe", Size = new Size(200, 40) };
+            btnAfficherGraphe.Click += BtnAfficherGraphe_Click;
+            btnAfficherGraphe.BringToFront();
+
             algoSelector = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 150,
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                Location = new Point(this.ClientSize.Width - 160, 10) // 10px à partir du haut et à 160px du bord droit
+                Width = 200
             };
-            algoSelector.Items.AddRange(new string[] { "Dijkstra", "Bellman-Ford", "Floyd-Warshall" });
-            algoSelector.SelectedIndex = 0; // Dijkstra par défaut
-            algoSelector.SelectedIndexChanged += (s, e) => panel1.Invalidate();
-            this.Controls.Add(algoSelector); // à la Form (pas au panel)
-            algoSelector.BringToFront(); // optionnel pour éviter que ce soit caché
+            algoSelector.Items.AddRange(new[] { "Dijkstra", "Bellman-Ford", "Floyd-Warshall" });
+            algoSelector.SelectedIndex = 0;
+            this.Controls.Add(algoSelector);
 
-            this.Load += Form1_Load;
+            searchBox = new TextBox
+            {
+                Width = 200,
+                Location = new Point(10, 300), // revoir comment positionner : faut le mettre à droite 
+                Visible = false
+
+            };
+            this.Controls.Add(searchBox);
+
+            searchButton = new Button
+            {
+                Text = "Rechercher",
+                Width = 100,
+                Location = new Point(10, 300), // revoir comment positionner : faut le mettre à droite 
+                Visible = false
+
+            };
+            searchButton.Click += SearchButton_Click;
+            this.Controls.Add(searchButton);
+
+            // Ajouter les boutons principaux à la form
+            this.Controls.AddRange(new Control[] { btnInscrire, btnVoirUtilisateurs, btnCommander, btnAfficherGraphe });
+
+            // Attacher les événements du graphe
             panel1.Paint += panel1_Paint;
             panel1.MouseWheel += panel1_MouseWheel;
             panel1.MouseDown += panel1_MouseDown;
@@ -78,9 +137,33 @@ namespace TestLinInParis
             panel1.MouseUp += panel1_MouseUp;
             panel1.DoubleClick += panel1_DoubleClick;
             panel1.MouseClick += panel1_MouseClick;
-            panel1.MouseEnter += (s, e) => panel1.Focus();        
+            panel1.MouseEnter += (s, e) => panel1.Focus();
 
+            // Centrage dynamique après le chargement
+            this.Load += (s, e) =>
+            {
+                int centerX = (this.ClientSize.Width - 200) / 2;
+                int top = 40;
+
+                lblTitre.Location = new Point((this.ClientSize.Width - lblTitre.Width) / 2, top);
+                top += lblTitre.Height + 10;
+
+                lblSousTitre.Location = new Point((this.ClientSize.Width - lblSousTitre.Width) / 2, top);
+                top += lblSousTitre.Height + 30;
+
+                btnInscrire.Location = new Point(centerX, top);
+                btnVoirUtilisateurs.Location = new Point(centerX, top += 50);
+                btnCommander.Location = new Point(centerX, top += 50);
+                btnAfficherGraphe.Location = new Point(centerX, top += 50);
+                algoSelector.Location = new Point(centerX, top += 60);
+
+                searchBox.Location = new Point(centerX, top += 60);
+                searchButton.Location = new Point(searchBox.Right + 10, searchBox.Top);
+            };
+
+            this.Load += Form1_Load;
         }
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -99,12 +182,41 @@ namespace TestLinInParis
                 maxLon = Math.Max(maxLon, station.Longitude);
             }
 
-            CentrerGraphe();
             panel1.Invalidate();
+            btnInscrire.BringToFront();
+            btnVoirUtilisateurs.BringToFront();
+            btnCommander.BringToFront();
+            btnAfficherGraphe.BringToFront();
+        }
+
+        private void BtnAfficherGraphe_Click(object sender, EventArgs e)
+        {
+            panel1.Visible = !panel1.Visible;
+            searchButton.Visible = !searchButton.Visible;
+            searchBox.Visible = !searchBox.Visible;
+            btnAfficherGraphe.Text = panel1.Visible ? "Cacher le graphe" : "Afficher le graphe";
+
+            this.Controls.Add(panel1);
+            CentrerGraphe();
+            panel1.BringToFront();
+            btnAfficherGraphe.BringToFront();
+            searchBox.BringToFront();
+            searchButton.BringToFront();
+        }
+
+        private void BtnVoirUtilisateurs_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Affichage des utilisateurs à implémenter", "Voir les utilisateurs", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void BtnOuvrirForm2_Click(object sender, EventArgs e)
+        {
+            Form2 fenetreAjout = new Form2();
+            fenetreAjout.ShowDialog();
         }
 
 
-
+        /* Pour le traçage du graphe */
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
             if (graphe == null) return;
@@ -356,6 +468,8 @@ namespace TestLinInParis
             lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} -> {chemin.Last().Valeur.Nom}");
             return lignesDetaillees;
         }
+        
+        
 
 
 
