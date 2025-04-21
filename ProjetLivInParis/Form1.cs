@@ -9,7 +9,6 @@ using ProjetLivInParis;
 
 namespace TestLinInParis
 {
-
     public partial class Form1 : Form
     {
         private Label lblTitre;
@@ -203,12 +202,11 @@ namespace TestLinInParis
             searchBox.BringToFront();
             searchButton.BringToFront();
         }
-
         private void BtnVoirUtilisateurs_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Affichage des utilisateurs à implémenter", "Voir les utilisateurs", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Form3 fenetreUtilisateurs = new Form3();
+            fenetreUtilisateurs.ShowDialog();
         }
-
         private void BtnOuvrirForm2_Click(object sender, EventArgs e)
         {
             Form2 fenetreAjout = new Form2();

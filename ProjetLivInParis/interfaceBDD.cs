@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Data;
 using MySql.Data.MySqlClient;
+using MySqlX.XDevAPI;
+using ProjetLivInParis;
+using Client = ProjetLivInParis.Client;
 
 namespace Project_LivInParis
 {
@@ -23,11 +26,12 @@ namespace Project_LivInParis
         }
 
         /// <summary>
-        /// Insère un utilisateur dans la table identite et retourne l'ID inséré.
+        /// Insère un utilisateur dans la table utilisateurs et retourne l'ID inséré.
         /// </summary>
         public int InsererUtilisateur(string nom, string prenom, string adresse, string telephone, string email, string motDePasse)
         {
-            string sql = @"INSERT INTO identite (Nom, Prenom, Adresse, Telephone, Email, MotDePasse)
+            // Correction: utilisez le même nom de table partout ('utilisateurs' au lieu de 'identite')
+            string sql = @"INSERT INTO utilisateurs (nom, prenom, adresse, telephone, email, mot_de_passe)
                            VALUES (@Nom, @Prenom, @Adresse, @Telephone, @Email, @MotDePasse);
                            SELECT LAST_INSERT_ID();";
 
@@ -48,7 +52,8 @@ namespace Project_LivInParis
         /// </summary>
         public void InsererClient(int id, string typeClient, string nomEntreprise, string referent)
         {
-            string sql = @"INSERT INTO Client (ID, TypeClient, NomEntreprise, Referent)
+            // Correction: utilisez le même nom de colonne partout ('id_utilisateur' au lieu de 'ID')
+            string sql = @"INSERT INTO clients (id_utilisateur, type_client, nom_entreprise, referent)
                            VALUES (@ID, @TypeClient, @NomEntreprise, @Referent);";
 
             using var cmd = new MySqlCommand(sql, connexion);
@@ -65,56 +70,170 @@ namespace Project_LivInParis
         /// </summary>
         public void InsererCuisinier(int id)
         {
-            string sql = @"INSERT INTO Cuisinier (ID) VALUES (@ID);";
+            // Correction: utilisez le même nom de colonne partout ('id_utilisateur' au lieu de 'ID')
+            string sql = @"INSERT INTO cuisiniers (id_utilisateur) VALUES (@ID);";
 
             using var cmd = new MySqlCommand(sql, connexion);
             cmd.Parameters.AddWithValue("@ID", id);
             cmd.ExecuteNonQuery();
         }
+
         public void AfficherUtilisateurs()
         {
-            string sql = "SELECT * FROM identite";
+            // Correction: utilisez le même nom de table partout ('utilisateurs' au lieu de 'identite')
+            string sql = "SELECT * FROM utilisateurs";
 
             using var cmd = new MySqlCommand(sql, connexion);
             using var reader = cmd.ExecuteReader();
 
             while (reader.Read())
             {
-                Console.WriteLine($"ID: {reader["ID"]}, Nom: {reader["Nom"]}, Prénom: {reader["Prenom"]}, Email: {reader["Email"]}");
+                Console.WriteLine($"ID: {reader["id"]}, Nom: {reader["nom"]}, Prénom: {reader["prenom"]}, Email: {reader["email"]}");
             }
         }
-        public class Utilisateur
-        {
-            public int ID { get; set; }
-            public string Nom { get; set; }
-            public string Prenom { get; set; }
-            public string Email { get; set; }
-        }
+
         public List<Utilisateur> RecupererUtilisateurs()
         {
-            var liste = new List<Utilisateur>();
+            List<Utilisateur> utilisateurs = new List<Utilisateur>();
 
-            string sql = "SELECT ID, Nom, Prenom, Email FROM identite ORDER BY ID";
-
-            using var cmd = new MySqlCommand(sql, connexion);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
+            try
             {
-                var user = new Utilisateur
+                string query = @"
+            SELECT u.*, 
+                CASE 
+                    WHEN c.id_utilisateur IS NOT NULL THEN 'Client' 
+                    WHEN cui.id_utilisateur IS NOT NULL THEN 'Cuisinier'
+                    ELSE 'Inconnu'
+                END AS type
+            FROM utilisateurs u
+            LEFT JOIN clients c ON u.id = c.id_utilisateur
+            LEFT JOIN cuisiniers cui ON u.id = cui.id_utilisateur
+            ORDER BY u.nom, u.prenom";
+
+                MySqlCommand cmd = new MySqlCommand(query, connexion);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    ID = reader.GetInt32("ID"),
-                    Nom = reader.GetString("Nom"),
-                    Prenom = reader.GetString("Prenom"),
-                    Email = reader.GetString("Email")
-                };
-                liste.Add(user);
+                    Utilisateur utilisateur;
+                    string type = reader.GetString("type");
+
+                    // Créer le bon type d'utilisateur selon le type récupéré
+                    if (type == "Client")
+                    {
+                        utilisateur = new Client();
+                    }
+                    else if (type == "Cuisinier")
+                    {
+                        utilisateur = new Cuisinier();
+                    }
+                    else
+                    {
+                        utilisateur = new Utilisateur();
+                    }
+
+                    // Remplir les propriétés communes
+                    utilisateur.ID = reader.GetInt32("id");
+                    utilisateur.Nom = reader.GetString("nom");
+                    utilisateur.Prenom = reader.GetString("prenom");
+                    utilisateur.Adresse = reader.GetString("adresse");
+                    utilisateur.Telephone = reader.GetString("telephone");
+                    utilisateur.Email = reader.GetString("email");
+
+                    utilisateurs.Add(utilisateur);
+                }
+
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erreur lors de la récupération des utilisateurs: " + ex.Message);
             }
 
-            return liste;
+            return utilisateurs;
         }
 
+        public List<Client> RecupererClients()
+        {
+            List<Client> clients = new List<Client>();
 
+            try
+            {
+                string query = @"
+            SELECT u.*, c.type_client, c.nom_entreprise, c.referent 
+            FROM utilisateurs u
+            INNER JOIN clients c ON u.id = c.id_utilisateur
+            ORDER BY u.nom, u.prenom";
 
+                MySqlCommand cmd = new MySqlCommand(query, connexion);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Client client = new Client
+                    {
+                        ID = reader.GetInt32("id"),
+                        Nom = reader.GetString("nom"),
+                        Prenom = reader.GetString("prenom"),
+                        Adresse = reader.GetString("adresse"),
+                        Telephone = reader.GetString("telephone"),
+                        Email = reader.GetString("email"),
+                        TypeClient = reader.GetString("type_client"),
+                        NomEntreprise = reader.IsDBNull(reader.GetOrdinal("nom_entreprise")) ? string.Empty : reader.GetString("nom_entreprise"),
+                        Referent = reader.IsDBNull(reader.GetOrdinal("referent")) ? string.Empty : reader.GetString("referent")
+                    };
+
+                    clients.Add(client);
+                }
+
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erreur lors de la récupération des clients: " + ex.Message);
+            }
+
+            return clients;
+        }
+
+        public List<Cuisinier> RecupererCuisiniers()
+        {
+            List<Cuisinier> cuisiniers = new List<Cuisinier>();
+
+            try
+            {
+                string query = @"
+            SELECT u.* 
+            FROM utilisateurs u
+            INNER JOIN cuisiniers c ON u.id = c.id_utilisateur
+            ORDER BY u.nom, u.prenom";
+
+                MySqlCommand cmd = new MySqlCommand(query, connexion);
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Cuisinier cuisinier = new Cuisinier
+                    {
+                        ID = reader.GetInt32("id"),
+                        Nom = reader.GetString("nom"),
+                        Prenom = reader.GetString("prenom"),
+                        Adresse = reader.GetString("adresse"),
+                        Telephone = reader.GetString("telephone"),
+                        Email = reader.GetString("email")
+                    };
+
+                    cuisiniers.Add(cuisinier);
+                }
+
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erreur lors de la récupération des cuisiniers: " + ex.Message);
+            }
+
+            return cuisiniers;
+        }
     }
 }

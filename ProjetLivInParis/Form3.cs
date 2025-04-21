@@ -1,0 +1,175 @@
+﻿using MySqlX.XDevAPI;
+using Project_LivInParis;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using static Project_LivInParis.InterfaceBDD;
+
+namespace ProjetLivInParis
+{
+    public partial class Form3 : Form
+    {
+        private ListView lvUtilisateurs;
+        private Button btnFermer;
+        private Button btnRafraichir;
+        private ComboBox cbFiltre;
+        private Label lblFiltre;
+
+        public Form3()
+        {
+            InitializeComponent();
+            this.Text = "Liste des Utilisateurs";
+            this.Size = new System.Drawing.Size(800, 500);
+            this.StartPosition = FormStartPosition.CenterScreen;
+
+            InitialiserComposants();
+            ChargerUtilisateurs();
+        }
+
+        private void InitialiserComposants()
+        {
+            // ListView pour les utilisateurs
+            lvUtilisateurs = new ListView();
+            lvUtilisateurs.Dock = DockStyle.Fill;
+            lvUtilisateurs.View = View.Details;
+            lvUtilisateurs.FullRowSelect = true;
+            lvUtilisateurs.GridLines = true;
+
+            // Ajout des colonnes
+            lvUtilisateurs.Columns.Add("ID", 50);
+            lvUtilisateurs.Columns.Add("Nom", 120);
+            lvUtilisateurs.Columns.Add("Prénom", 120);
+            lvUtilisateurs.Columns.Add("Email", 180);
+            lvUtilisateurs.Columns.Add("Téléphone", 120);
+            lvUtilisateurs.Columns.Add("Type", 80);
+            lvUtilisateurs.Columns.Add("Détails", 120);
+
+            // Panel pour les boutons (en bas)
+            Panel panelBoutons = new Panel();
+            panelBoutons.Dock = DockStyle.Bottom;
+            panelBoutons.Height = 60;
+
+            // Panel pour le filtre (en haut)
+            Panel panelFiltre = new Panel();
+            panelFiltre.Dock = DockStyle.Top;
+            panelFiltre.Height = 40;
+            panelFiltre.Padding = new Padding(10);
+
+            // Filtre par type d'utilisateur
+            lblFiltre = new Label();
+            lblFiltre.Text = "Filtrer par:";
+            lblFiltre.AutoSize = true;
+            lblFiltre.Location = new Point(10, 10);
+
+            cbFiltre = new ComboBox();
+            cbFiltre.Items.AddRange(new object[] { "Tous", "Clients", "Cuisiniers" });
+            cbFiltre.SelectedIndex = 0;
+            cbFiltre.Location = new Point(lblFiltre.Right + 10, 7);
+            cbFiltre.Width = 150;
+            cbFiltre.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbFiltre.SelectedIndexChanged += CbFiltre_SelectedIndexChanged;
+
+            // Boutons
+            btnFermer = new Button();
+            btnFermer.Text = "Fermer";
+            btnFermer.Size = new Size(100, 30);
+            btnFermer.Location = new Point(panelBoutons.Width - 120, 15);
+            btnFermer.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
+            btnFermer.Click += (s, e) => this.Close();
+
+            btnRafraichir = new Button();
+            btnRafraichir.Text = "Rafraîchir";
+            btnRafraichir.Size = new Size(100, 30);
+            btnRafraichir.Location = new Point(btnFermer.Left - 120, 15);
+            btnRafraichir.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
+            btnRafraichir.Click += (s, e) => ChargerUtilisateurs();
+
+            // Ajout des contrôles aux panels
+            panelFiltre.Controls.Add(lblFiltre);
+            panelFiltre.Controls.Add(cbFiltre);
+
+            panelBoutons.Controls.Add(btnFermer);
+            panelBoutons.Controls.Add(btnRafraichir);
+
+            // Ajout des panels à la form
+            this.Controls.Add(lvUtilisateurs);
+            this.Controls.Add(panelBoutons);
+            this.Controls.Add(panelFiltre);
+        }
+
+        private void ChargerUtilisateurs(string filtre = "Tous")
+        {
+            try
+            {
+                var db = new InterfaceBDD();
+                db.Connexion();
+
+                List<Utilisateur> utilisateurs;
+
+                switch (filtre)
+                {
+                    case "Clients":
+                        utilisateurs = db.RecupererClients().Cast<Utilisateur>().ToList();
+                        break;
+                    case "Cuisiniers":
+                        utilisateurs = db.RecupererCuisiniers().Cast<Utilisateur>().ToList();
+                        break;
+                    default:
+                        utilisateurs = db.RecupererUtilisateurs();
+                        break;
+                }
+
+                lvUtilisateurs.Items.Clear();
+
+                foreach (var user in utilisateurs)
+                {
+                    ListViewItem item = new ListViewItem(user.ID.ToString());
+                    item.SubItems.Add(user.Nom);
+                    item.SubItems.Add(user.Prenom);
+                    item.SubItems.Add(user.Email);
+                    item.SubItems.Add(user.Telephone);
+
+                    string type = "N/A";
+                    string details = "";
+
+                    if (user is Client client)
+                    {
+                        type = "Client";
+                        details = client.TypeClient;
+                        if (client.TypeClient == "Entreprise")
+                        {
+                            details += $" - {client.NomEntreprise}";
+                        }
+                    }
+                    else if (user is Cuisinier)
+                    {
+                        type = "Cuisinier";
+                    }
+
+                    item.SubItems.Add(type);
+                    item.SubItems.Add(details);
+
+                    lvUtilisateurs.Items.Add(item);
+                }
+
+                db.FermerConnexion();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur lors du chargement des utilisateurs: " + ex.Message,
+                    "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void CbFiltre_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ChargerUtilisateurs(cbFiltre.SelectedItem.ToString());
+        }
+    }
+}
