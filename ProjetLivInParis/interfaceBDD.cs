@@ -30,7 +30,7 @@ namespace Project_LivInParis
         /// </summary>
         public int InsererUtilisateur(string nom, string prenom, string adresse, string telephone, string email, string motDePasse)
         {
-            string sql = @"INSERT INTO identite (nom, prenom, adresse, telephone, email, mot_de_passe)
+            string sql = @"INSERT INTO identite (nom, prenom, adresse, telephone, email, motDePasse)
                    VALUES (@Nom, @Prenom, @Adresse, @Telephone, @Email, @MotDePasse);
                    SELECT LAST_INSERT_ID();";
 
