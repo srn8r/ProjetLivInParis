@@ -30,10 +30,9 @@ namespace Project_LivInParis
         /// </summary>
         public int InsererUtilisateur(string nom, string prenom, string adresse, string telephone, string email, string motDePasse)
         {
-            // Correction: utilisez le même nom de table partout ('utilisateurs' au lieu de 'identite')
-            string sql = @"INSERT INTO utilisateurs (nom, prenom, adresse, telephone, email, mot_de_passe)
-                           VALUES (@Nom, @Prenom, @Adresse, @Telephone, @Email, @MotDePasse);
-                           SELECT LAST_INSERT_ID();";
+            string sql = @"INSERT INTO identite (nom, prenom, adresse, telephone, email, mot_de_passe)
+                   VALUES (@Nom, @Prenom, @Adresse, @Telephone, @Email, @MotDePasse);
+                   SELECT LAST_INSERT_ID();";
 
             using var cmd = new MySqlCommand(sql, connexion);
             cmd.Parameters.AddWithValue("@Nom", nom);
@@ -52,9 +51,8 @@ namespace Project_LivInParis
         /// </summary>
         public void InsererClient(int id, string typeClient, string nomEntreprise, string referent)
         {
-            // Correction: utilisez le même nom de colonne partout ('id_utilisateur' au lieu de 'ID')
-            string sql = @"INSERT INTO clients (id_utilisateur, type_client, nom_entreprise, referent)
-                           VALUES (@ID, @TypeClient, @NomEntreprise, @Referent);";
+            string sql = @"INSERT INTO client (ID, TypeClient, NomEntreprise, Referent)
+              VALUES (@ID, @TypeClient, @NomEntreprise, @Referent);";
 
             using var cmd = new MySqlCommand(sql, connexion);
             cmd.Parameters.AddWithValue("@ID", id);
@@ -70,18 +68,15 @@ namespace Project_LivInParis
         /// </summary>
         public void InsererCuisinier(int id)
         {
-            // Correction: utilisez le même nom de colonne partout ('id_utilisateur' au lieu de 'ID')
-            string sql = @"INSERT INTO cuisiniers (id_utilisateur) VALUES (@ID);";
+            string sql = @"INSERT INTO cuisinier (ID) VALUES (@ID);";
 
             using var cmd = new MySqlCommand(sql, connexion);
             cmd.Parameters.AddWithValue("@ID", id);
             cmd.ExecuteNonQuery();
         }
-
         public void AfficherUtilisateurs()
         {
-            // Correction: utilisez le même nom de table partout ('utilisateurs' au lieu de 'identite')
-            string sql = "SELECT * FROM utilisateurs";
+            string sql = "SELECT * FROM identite";
 
             using var cmd = new MySqlCommand(sql, connexion);
             using var reader = cmd.ExecuteReader();
@@ -99,16 +94,16 @@ namespace Project_LivInParis
             try
             {
                 string query = @"
-            SELECT u.*, 
-                CASE 
-                    WHEN c.id_utilisateur IS NOT NULL THEN 'Client' 
-                    WHEN cui.id_utilisateur IS NOT NULL THEN 'Cuisinier'
-                    ELSE 'Inconnu'
-                END AS type
-            FROM utilisateurs u
-            LEFT JOIN clients c ON u.id = c.id_utilisateur
-            LEFT JOIN cuisiniers cui ON u.id = cui.id_utilisateur
-            ORDER BY u.nom, u.prenom";
+                                    SELECT u.*, 
+                                        CASE 
+                                            WHEN c.ID IS NOT NULL THEN 'Client' 
+                                            WHEN cui.ID IS NOT NULL THEN 'Cuisinier'
+                                            ELSE 'Inconnu'
+                                        END AS type
+                                    FROM identite u
+                                    LEFT JOIN client c ON u.ID = c.ID
+                                    LEFT JOIN cuisinier cui ON u.ID = cui.ID
+                                    ORDER BY u.Nom, u.Prenom";
 
                 MySqlCommand cmd = new MySqlCommand(query, connexion);
                 MySqlDataReader reader = cmd.ExecuteReader();
@@ -160,10 +155,10 @@ namespace Project_LivInParis
             try
             {
                 string query = @"
-            SELECT u.*, c.type_client, c.nom_entreprise, c.referent 
-            FROM utilisateurs u
-            INNER JOIN clients c ON u.id = c.id_utilisateur
-            ORDER BY u.nom, u.prenom";
+                                    SELECT u.*, c.TypeClient, c.NomEntreprise, c.Referent 
+                                    FROM identite u
+                                    INNER JOIN client c ON u.ID = c.ID
+                                    ORDER BY u.Nom, u.Prenom";
 
                 MySqlCommand cmd = new MySqlCommand(query, connexion);
                 MySqlDataReader reader = cmd.ExecuteReader();
@@ -172,15 +167,15 @@ namespace Project_LivInParis
                 {
                     Client client = new Client
                     {
-                        ID = reader.GetInt32("id"),
-                        Nom = reader.GetString("nom"),
-                        Prenom = reader.GetString("prenom"),
-                        Adresse = reader.GetString("adresse"),
-                        Telephone = reader.GetString("telephone"),
-                        Email = reader.GetString("email"),
-                        TypeClient = reader.GetString("type_client"),
-                        NomEntreprise = reader.IsDBNull(reader.GetOrdinal("nom_entreprise")) ? string.Empty : reader.GetString("nom_entreprise"),
-                        Referent = reader.IsDBNull(reader.GetOrdinal("referent")) ? string.Empty : reader.GetString("referent")
+                        ID = reader.GetInt32("ID"),
+                        Nom = reader.GetString("Nom"),
+                        Prenom = reader.GetString("Prenom"),
+                        Adresse = reader.GetString("Adresse"),
+                        Telephone = reader.GetString("Telephone"),
+                        Email = reader.GetString("Email"),
+                        TypeClient = reader.GetString("TypeClient"),
+                        NomEntreprise = reader.IsDBNull(reader.GetOrdinal("NomEntreprise")) ? string.Empty : reader.GetString("NomEntreprise"),
+                        Referent = reader.IsDBNull(reader.GetOrdinal("Referent")) ? string.Empty : reader.GetString("Referent")
                     };
 
                     clients.Add(client);
@@ -196,6 +191,7 @@ namespace Project_LivInParis
             return clients;
         }
 
+
         public List<Cuisinier> RecupererCuisiniers()
         {
             List<Cuisinier> cuisiniers = new List<Cuisinier>();
@@ -203,10 +199,10 @@ namespace Project_LivInParis
             try
             {
                 string query = @"
-            SELECT u.* 
-            FROM utilisateurs u
-            INNER JOIN cuisiniers c ON u.id = c.id_utilisateur
-            ORDER BY u.nom, u.prenom";
+                                    SELECT u.* 
+                                    FROM identite u
+                                    INNER JOIN cuisinier c ON u.ID = c.ID
+                                    ORDER BY u.Nom, u.Prenom";
 
                 MySqlCommand cmd = new MySqlCommand(query, connexion);
                 MySqlDataReader reader = cmd.ExecuteReader();
