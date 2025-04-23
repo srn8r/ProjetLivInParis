@@ -1,6 +1,6 @@
 ﻿namespace TestLinInParis
 {
-    partial class Form1
+    partial class FormAccueil
     {
         /// <summary>
         ///  Required designer variable.

@@ -170,6 +170,7 @@ namespace ProjetLivInParis
         {
             ChargerUtilisateurs(cbFiltre.SelectedItem.ToString());
         }
+
         private void BtnSupprimer_Click(object sender, EventArgs e)
         {
             // Vérifier si un utilisateur est sélectionné
