@@ -231,5 +231,42 @@ namespace Project_LivInParis
 
             return cuisiniers;
         }
+
+        public bool SupprimerUtilisateur(int idUtilisateur)
+        {
+            try
+            {
+                MySqlTransaction transaction = connexion.BeginTransaction();
+                try
+                {
+                    using (MySqlCommand cmdClient = new MySqlCommand("DELETE FROM client WHERE ID = @id", connexion, transaction))
+                    {
+                        cmdClient.Parameters.AddWithValue("@id", idUtilisateur);
+                        cmdClient.ExecuteNonQuery();
+                    }
+                    using (MySqlCommand cmdCuisinier = new MySqlCommand("DELETE FROM cuisinier WHERE ID = @id", connexion, transaction))
+                    {
+                        cmdCuisinier.Parameters.AddWithValue("@id", idUtilisateur);
+                        cmdCuisinier.ExecuteNonQuery();
+                    }
+                    using (MySqlCommand cmdIdentite = new MySqlCommand("DELETE FROM identite WHERE ID = @id", connexion, transaction))
+                    {
+                        cmdIdentite.Parameters.AddWithValue("@id", idUtilisateur);
+                        int lignesAffectees = cmdIdentite.ExecuteNonQuery();
+                        transaction.Commit();
+                        return lignesAffectees > 0;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception("Erreur lors de la suppression de l'utilisateur: " + ex.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erreur lors de la suppression de l'utilisateur: " + ex.Message);
+            }
+        }
     }
 }

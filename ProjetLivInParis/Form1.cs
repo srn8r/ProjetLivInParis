@@ -150,8 +150,10 @@ namespace TestLinInParis
             {
                 Text = "Rechercher",
                 Width = 100,
-                Location = new Point(10, 300),
-                Visible = false
+                Height = 40,
+                Location = new Point(10, 350),
+                Visible = false,
+                ForeColor = Color.White
 
             };
             searchButton.Click += SearchButton_Click;

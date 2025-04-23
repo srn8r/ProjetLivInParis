@@ -18,6 +18,7 @@ namespace ProjetLivInParis
         private ListView lvUtilisateurs;
         private Button btnFermer;
         private Button btnRafraichir;
+        private Button btnSupprimer;
         private ComboBox cbFiltre;
         private Label lblFiltre;
 
@@ -90,13 +91,20 @@ namespace ProjetLivInParis
             btnRafraichir.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
             btnRafraichir.Click += (s, e) => ChargerUtilisateurs();
 
+            btnSupprimer = new Button();
+            btnSupprimer.Text = "Supprimer";
+            btnSupprimer.Size = new Size(100, 30);
+            btnSupprimer.Location = new Point(btnRafraichir.Left - 120, 15);
+            btnSupprimer.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
+            btnSupprimer.Click += BtnSupprimer_Click;
+
             // Ajout des contrôles aux panels
             panelFiltre.Controls.Add(lblFiltre);
             panelFiltre.Controls.Add(cbFiltre);
 
             panelBoutons.Controls.Add(btnFermer);
             panelBoutons.Controls.Add(btnRafraichir);
-
+            panelBoutons.Controls.Add(btnSupprimer);
             // Ajout des panels à la form
             this.Controls.Add(lvUtilisateurs);
             this.Controls.Add(panelBoutons);
@@ -170,6 +178,61 @@ namespace ProjetLivInParis
         private void CbFiltre_SelectedIndexChanged(object sender, EventArgs e)
         {
             ChargerUtilisateurs(cbFiltre.SelectedItem.ToString());
+        }
+        private void BtnSupprimer_Click(object sender, EventArgs e)
+        {
+            // Vérifier si un utilisateur est sélectionné
+            if (lvUtilisateurs.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Veuillez sélectionner un utilisateur à supprimer.",
+                    "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // Récupérer l'ID et le nom de l'utilisateur sélectionné
+            int idUtilisateur = int.Parse(lvUtilisateurs.SelectedItems[0].SubItems[0].Text);
+            string nomUtilisateur = lvUtilisateurs.SelectedItems[0].SubItems[1].Text + " " +
+                                   lvUtilisateurs.SelectedItems[0].SubItems[2].Text;
+            string typeUtilisateur = lvUtilisateurs.SelectedItems[0].SubItems[5].Text;
+
+            // Demander confirmation avant de supprimer
+            DialogResult result = MessageBox.Show(
+                $"Êtes-vous sûr de vouloir supprimer l'utilisateur {nomUtilisateur} ?",
+                "Confirmation de suppression",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    var db = new InterfaceBDD();
+                    db.Connexion();
+
+                    // Supprimer l'utilisateur de la base de données
+                    bool suppressionReussie = db.SupprimerUtilisateur(idUtilisateur);
+                    db.FermerConnexion();
+
+                    if (suppressionReussie)
+                    {
+                        MessageBox.Show($"L'utilisateur {nomUtilisateur} a été supprimé avec succès.",
+                            "Suppression réussie", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        // Rafraîchir la liste des utilisateurs
+                        ChargerUtilisateurs(cbFiltre.SelectedItem.ToString());
+                    }
+                    else
+                    {
+                        MessageBox.Show("La suppression a échoué.",
+                            "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Erreur lors de la suppression de l'utilisateur: " + ex.Message,
+                        "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
     }
 }

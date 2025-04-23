@@ -89,15 +89,6 @@ namespace ProjetLivInParis
 
             CbTypeClient_SelectedIndexChanged(null, null);
             RbClient_CheckedChanged(null, null);
-            Button btnVoirUtilisateurs = new Button
-            {
-                Text = "Voir les utilisateurs",
-                Left = 180,
-                Top = btnAjouter.Bottom + 20,
-                Width = 150
-            };
-            btnVoirUtilisateurs.Click += BtnVoirUtilisateurs_Click;
-            Controls.Add(btnVoirUtilisateurs);
 
         }
 
@@ -154,34 +145,5 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors de l'ajout : " + ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void BtnVoirUtilisateurs_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var db = new InterfaceBDD();
-                db.Connexion();
-
-                var utilisateurs = db.RecupererUtilisateurs();
-
-                if (utilisateurs.Count == 0)
-                {
-                    MessageBox.Show("Aucun utilisateur trouvé.", "Infos", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                string texte = string.Join("\n", utilisateurs.Select(u =>
-                    $"ID: {u.ID} | {u.Prenom} {u.Nom} | {u.Email}"));
-
-                MessageBox.Show(texte, "Liste des utilisateurs", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                db.FermerConnexion();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Erreur : " + ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-
     }
 }
