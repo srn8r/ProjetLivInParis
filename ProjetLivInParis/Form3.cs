@@ -17,7 +17,6 @@ namespace ProjetLivInParis
     {
         private ListView lvUtilisateurs;
         private Button btnFermer;
-        private Button btnRafraichir;
         private Button btnSupprimer;
         private ComboBox cbFiltre;
         private Label lblFiltre;
@@ -84,17 +83,10 @@ namespace ProjetLivInParis
             btnFermer.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
             btnFermer.Click += (s, e) => this.Close();
 
-            btnRafraichir = new Button();
-            btnRafraichir.Text = "Rafraîchir";
-            btnRafraichir.Size = new Size(100, 30);
-            btnRafraichir.Location = new Point(btnFermer.Left - 120, 15);
-            btnRafraichir.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
-            btnRafraichir.Click += (s, e) => ChargerUtilisateurs();
-
             btnSupprimer = new Button();
             btnSupprimer.Text = "Supprimer";
             btnSupprimer.Size = new Size(100, 30);
-            btnSupprimer.Location = new Point(btnRafraichir.Left - 120, 15);
+            btnSupprimer.Location = new Point(btnFermer.Left - 120, 15);
             btnSupprimer.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
             btnSupprimer.Click += BtnSupprimer_Click;
 
@@ -103,7 +95,6 @@ namespace ProjetLivInParis
             panelFiltre.Controls.Add(cbFiltre);
 
             panelBoutons.Controls.Add(btnFermer);
-            panelBoutons.Controls.Add(btnRafraichir);
             panelBoutons.Controls.Add(btnSupprimer);
             // Ajout des panels à la form
             this.Controls.Add(lvUtilisateurs);
