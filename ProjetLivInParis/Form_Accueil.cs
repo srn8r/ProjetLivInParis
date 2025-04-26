@@ -11,11 +11,15 @@ namespace TestLinInParis
 {
     public partial class Form_Accueil : Form
     {
+        #region propriétés
+
         private Label lblTitre;
         private Label lblSousTitre;
         private Button btnAdmin;
         private Button btnUtilisateur;
+        #endregion
 
+        #region constructeur
         public Form_Accueil()
         {
             InitializeComponent();
@@ -24,6 +28,7 @@ namespace TestLinInParis
             this.Size = new Size(800, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.DarkMagenta;
+            this.Resize += FormAccueil_Resize;
 
             // Titre
             lblTitre = new Label
@@ -80,5 +85,16 @@ namespace TestLinInParis
             this.Controls.Add(btnUtilisateur);
             btnUtilisateur.BringToFront();
         }
+        #endregion
+
+        #region resize
+        private void FormAccueil_Resize(object sender, EventArgs e)
+        {
+            lblTitre.Location = new Point((this.ClientSize.Width - lblTitre.Width) / 2, 100);
+            lblSousTitre.Location = new Point((this.ClientSize.Width - lblSousTitre.Width) / 2, 160);
+            btnAdmin.Location = new Point((this.ClientSize.Width - btnAdmin.Width) / 2, 250);
+            btnUtilisateur.Location = new Point((this.ClientSize.Width - btnUtilisateur.Width) / 2, 320);
+        }
+        #endregion
     }
 }

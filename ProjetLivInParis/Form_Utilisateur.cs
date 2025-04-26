@@ -28,6 +28,7 @@ namespace ProjetLivInParis
             this.Size = new Size(600, 400);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.MediumPurple;
+            this.Resize += FormUtilisateur_Resize;
 
             lblTitre = new Label
             {
@@ -64,6 +65,15 @@ namespace ProjetLivInParis
             };
             btnConnexion.Click += BtnConnexion_Click;
             this.Controls.Add(btnConnexion);
+        }
+        #endregion
+
+        #region resize
+        private void FormUtilisateur_Resize(object sender, EventArgs e)
+        {
+            lblTitre.Location = new Point((this.ClientSize.Width - lblTitre.Width) / 2, 50);
+            btnInscrire.Location = new Point((this.ClientSize.Width - btnInscrire.Width) / 2, 150);
+            btnConnexion.Location = new Point((this.ClientSize.Width - btnConnexion.Width) / 2, 220);
         }
         #endregion
 

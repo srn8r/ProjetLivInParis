@@ -76,7 +76,7 @@ namespace ProjetLivInParis
         }
         #endregion
 
-        #region méthode pour centrer
+        #region resize
         private void FormAdmin_Resize(object sender, EventArgs e)
         {
             lblTitre.Location = new Point((this.ClientSize.Width - lblTitre.Width) / 2, 50);
