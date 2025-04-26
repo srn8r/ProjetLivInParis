@@ -11,7 +11,7 @@ using Project_LivInParis;
 
 namespace ProjetLivInParis
 {
-    public partial class FormAdmin : Form
+    public partial class Form_Admin : Form
     {
         #region propriétés
 
@@ -21,7 +21,7 @@ namespace ProjetLivInParis
         #endregion
 
         #region constructeur
-        public FormAdmin()
+        public Form_Admin()
         {
             InitializeComponent();
 
@@ -53,7 +53,7 @@ namespace ProjetLivInParis
                 Font = new Font("Segoe UI", 12),
                 Cursor = Cursors.Hand
             };
-            btnVoirUtilisateurs.Click += (s, e) => new Form_AfficherUtilisateur().ShowDialog();
+            btnVoirUtilisateurs.Click += (s, e) => new Form_AfficherUtilisateurs().ShowDialog();
             this.Controls.Add(btnVoirUtilisateurs);
 
             // Bouton Afficher le Graphe
@@ -69,7 +69,7 @@ namespace ProjetLivInParis
             };
             btnAfficherGraphe.Click += (s, e) =>
             {
-                FormGraphe grapheForm = new FormGraphe(); 
+                Form_Graphe grapheForm = new Form_Graphe(); 
                 grapheForm.ShowDialog();
             };
             this.Controls.Add(btnAfficherGraphe);

@@ -10,13 +10,13 @@ using System.Windows.Forms;
 
 namespace ProjetLivInParis
 {
-    public partial class FormUtilisateur : Form
+    public partial class Form_Utilisateur : Form
     {
         private Button btnInscrire;
         private Button btnConnexion;
         private Label lblTitre;
 
-        public FormUtilisateur()
+        public Form_Utilisateur()
         {
             InitializeComponent();
 

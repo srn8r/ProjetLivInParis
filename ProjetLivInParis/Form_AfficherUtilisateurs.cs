@@ -3,7 +3,7 @@ using System.Data;
 
 namespace ProjetLivInParis
 {
-    public partial class Form_AfficherUtilisateur : Form
+    public partial class Form_AfficherUtilisateurs : Form
     {
         private ListView lvUtilisateurs;
         private Button btnFermer;
@@ -11,7 +11,7 @@ namespace ProjetLivInParis
         private ComboBox cbFiltre;
         private Label lblFiltre;
 
-        public Form_AfficherUtilisateur()
+        public Form_AfficherUtilisateurs()
         {
             InitializeComponent();
             this.Text = "Liste des Utilisateurs";

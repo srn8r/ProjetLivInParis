@@ -9,14 +9,14 @@ using ProjetLivInParis;
 
 namespace TestLinInParis
 {
-    public partial class FormAccueil : Form
+    public partial class Form_Accueil : Form
     {
         private Label lblTitre;
         private Label lblSousTitre;
         private Button btnAdmin;
         private Button btnUtilisateur;
 
-        public FormAccueil()
+        public Form_Accueil()
         {
             InitializeComponent();
 
@@ -61,7 +61,7 @@ namespace TestLinInParis
                 Cursor = Cursors.Hand
 
             };
-            btnAdmin.Click += (s, e) => new FormAdmin().ShowDialog();
+            btnAdmin.Click += (s, e) => new Form_Admin().ShowDialog();
             this.Controls.Add(btnAdmin);
             btnAdmin.BringToFront();
 
@@ -76,7 +76,7 @@ namespace TestLinInParis
                 Font = new Font("Segoe UI", 12),
                 Cursor = Cursors.Hand
             };
-            btnUtilisateur.Click += (s, e) => new FormUtilisateur().ShowDialog();
+            btnUtilisateur.Click += (s, e) => new Form_Utilisateur().ShowDialog();
             this.Controls.Add(btnUtilisateur);
             btnUtilisateur.BringToFront();
         }

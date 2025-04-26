@@ -1,6 +1,6 @@
 ﻿namespace ProjetLivInParis
 {
-    partial class FormGraphe
+    partial class Form_Graphe
     {
         /// <summary>
         /// Required designer variable.

@@ -11,7 +11,7 @@ using Project_LivInParis;
 
 namespace ProjetLivInParis
 {
-    public partial class FormGraphe : Form
+    public partial class Form_Graphe : Form
     {
         private Panel panel1;
         private Label lblTitre;
@@ -42,7 +42,7 @@ namespace ProjetLivInParis
             { "12", Color.SeaGreen }, { "13", Color.Teal }, { "14", Color.DarkViolet },
         };
 
-        public FormGraphe()
+        public Form_Graphe()
         {
             InitializeComponent();
             this.Text = "Visualisation du graphe";
