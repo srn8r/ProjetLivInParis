@@ -45,7 +45,7 @@ namespace ProjetLivInParis
                 Font = new Font("Segoe UI", 12),
                 Cursor = Cursors.Hand
             };
-            btnInscrire.Click += (s, e) => new Form2().ShowDialog();
+            btnInscrire.Click += (s, e) => new Form_AjoutUtilisateurs().ShowDialog();
             this.Controls.Add(btnInscrire);
 
             btnConnexion = new Button

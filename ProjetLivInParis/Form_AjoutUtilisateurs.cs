@@ -4,7 +4,7 @@ using Project_LivInParis;
 
 namespace ProjetLivInParis
 {
-    public partial class Form2 : Form
+    public partial class Form_AjoutUtilisateurs : Form
     {
         private TextBox txtNom, txtPrenom, txtAdresse, txtTelephone, txtEmail, txtMotDePasse;
         private RadioButton rbClient, rbCuisinier;
@@ -12,7 +12,7 @@ namespace ProjetLivInParis
         private TextBox txtNomEntreprise, txtReferent;
         private Button btnAjouter;
 
-        public Form2()
+        public Form_AjoutUtilisateurs()
         {
             InitializeComponent();
             this.Text = "Ajout Client / Cuisinier";

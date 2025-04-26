@@ -1,6 +1,6 @@
 ﻿namespace ProjetLivInParis
 {
-    partial class Form2 : Form
+    partial class Form_AjoutUtilisateurs : Form
     {
         /// <summary>
         /// Required designer variable.
