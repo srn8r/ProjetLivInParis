@@ -13,36 +13,14 @@ namespace ProjetLivInParis
 {
     public partial class FormAdmin : Form
     {
+        #region propriétés
+
         private Label lblTitre;
         private Label lblSousTitre;
         private Button btnVoirUtilisateurs, btnAfficherGraphe;
+        #endregion
 
-        private StationManager stationManager;
-        private Graphe<Station> graphe;
-        private Station selectedStation1 = null;
-        private Station selectedStation2 = null;
-        private List<Noeud<Station>> chemin = new();
-
-        private double minLat = double.MaxValue, maxLat = double.MinValue;
-        private double minLon = double.MaxValue, maxLon = double.MinValue;
-        private float zoom = 1.0f;
-        private PointF offset = new PointF(0, 0);
-        private bool isDragging = false;
-        private Point lastMousePos;
-        private ComboBox algoSelector;
-        private TextBox searchBox;
-        private Button searchButton;
-
-
-
-        private Dictionary<string, Color> couleursParLigne = new Dictionary<string, Color>()
-        {
-            { "1", Color.Gold }, { "2", Color.Blue }, { "3", Color.Brown }, { "4", Color.Purple },
-            { "5", Color.Orange }, { "6", Color.LightGreen }, { "7", Color.Pink }, { "8", Color.Gray },
-            { "9", Color.Olive }, { "10", Color.DarkGoldenrod }, { "11", Color.DarkOrange },
-            { "12", Color.SeaGreen }, { "13", Color.Teal }, { "14", Color.DarkViolet },
-        };
-
+        #region constructeur
         public FormAdmin()
         {
             InitializeComponent();
@@ -51,6 +29,7 @@ namespace ProjetLivInParis
             this.Size = new Size(600, 400);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.MediumPurple;
+            this.Resize += FormAdmin_Resize;
 
             // Titre
             lblTitre = new Label
@@ -74,7 +53,7 @@ namespace ProjetLivInParis
                 Font = new Font("Segoe UI", 12),
                 Cursor = Cursors.Hand
             };
-            btnVoirUtilisateurs.Click += (s, e) => new Form3().ShowDialog();
+            btnVoirUtilisateurs.Click += (s, e) => new Form_AfficherUtilisateur().ShowDialog();
             this.Controls.Add(btnVoirUtilisateurs);
 
             // Bouton Afficher le Graphe
@@ -90,10 +69,20 @@ namespace ProjetLivInParis
             };
             btnAfficherGraphe.Click += (s, e) =>
             {
-                FormGraphe grapheForm = new FormGraphe(); // à créer en extrayant la partie graphe de Form1
+                FormGraphe grapheForm = new FormGraphe(); 
                 grapheForm.ShowDialog();
             };
             this.Controls.Add(btnAfficherGraphe);
         }
+        #endregion
+
+        #region méthode pour centrer
+        private void FormAdmin_Resize(object sender, EventArgs e)
+        {
+            lblTitre.Location = new Point((this.ClientSize.Width - lblTitre.Width) / 2, 50);
+            btnVoirUtilisateurs.Location = new Point((this.ClientSize.Width - btnVoirUtilisateurs.Width) / 2, 150);
+            btnAfficherGraphe.Location = new Point((this.ClientSize.Width - btnAfficherGraphe.Width) / 2, 220);
+        }
+        #endregion
     }
 }

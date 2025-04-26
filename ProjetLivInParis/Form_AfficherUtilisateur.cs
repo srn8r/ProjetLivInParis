@@ -1,19 +1,9 @@
-﻿using MySqlX.XDevAPI;
-using Project_LivInParis;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Project_LivInParis;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static Project_LivInParis.InterfaceBDD;
 
 namespace ProjetLivInParis
 {
-    public partial class Form3 : Form
+    public partial class Form_AfficherUtilisateur : Form
     {
         private ListView lvUtilisateurs;
         private Button btnFermer;
@@ -21,7 +11,7 @@ namespace ProjetLivInParis
         private ComboBox cbFiltre;
         private Label lblFiltre;
 
-        public Form3()
+        public Form_AfficherUtilisateur()
         {
             InitializeComponent();
             this.Text = "Liste des Utilisateurs";
