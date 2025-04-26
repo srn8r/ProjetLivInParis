@@ -13,6 +13,8 @@ namespace ProjetLivInParis
 {
     public partial class Form_Graphe : Form
     {
+        #region propriétés
+
         private Panel panel1;
         private Label lblTitre;
         private Label lblSousTitre;
@@ -41,7 +43,9 @@ namespace ProjetLivInParis
             { "9", Color.Olive }, { "10", Color.DarkGoldenrod }, { "11", Color.DarkOrange },
             { "12", Color.SeaGreen }, { "13", Color.Teal }, { "14", Color.DarkViolet },
         };
+        #endregion
 
+        #region constructeur
         public Form_Graphe()
         {
             InitializeComponent();
@@ -54,34 +58,59 @@ namespace ProjetLivInParis
                 Dock = DockStyle.Fill,
                 BackColor = Color.White
             };
-            this.Controls.Add(panel1);
+
+            Panel controlPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 60,
+                BackColor = Color.WhiteSmoke,
+                Padding = new Padding(10)
+            };
 
             algoSelector = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Width = 200,
+                Font = new Font("Segoe UI", 9),
+                FlatStyle = FlatStyle.Flat,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Location = new Point(controlPanel.Width - 220, 15)
             };
             algoSelector.Items.AddRange(new[] { "Dijkstra", "Bellman-Ford", "Floyd-Warshall" });
             algoSelector.SelectedIndex = 0;
-            this.Controls.Add(algoSelector);
-            algoSelector.BringToFront();
-
 
             searchBox = new TextBox
             {
-                Width = 200,
+                Width = 250,
+                Font = new Font("Segoe UI", 10),
+                BorderStyle = BorderStyle.FixedSingle,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Location = new Point(algoSelector.Left - 370, 15),
+                Padding = new Padding(5),
+                PlaceholderText = "Rechercher une station..."
             };
-            this.Controls.Add(searchBox);
-            searchBox.BringToFront();
 
             searchButton = new Button
             {
                 Text = "Rechercher",
-                Width = 100
+                Width = 100,
+                Height = searchBox.Height + 2,
+                Font = new Font("Segoe UI", 9),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.RoyalBlue,
+                ForeColor = Color.White,
+                Cursor = Cursors.Hand,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                Location = new Point(searchBox.Right + 10, searchBox.Top)
             };
             searchButton.Click += SearchButton_Click;
-            this.Controls.Add(searchButton);
-            searchButton.BringToFront();
+
+            controlPanel.Controls.Add(searchBox);
+            controlPanel.Controls.Add(searchButton);
+            controlPanel.Controls.Add(algoSelector);
+
+            this.Controls.Add(panel1);
+            this.Controls.Add(controlPanel);
 
             panel1.Paint += panel1_Paint;
             panel1.MouseWheel += panel1_MouseWheel;
@@ -91,12 +120,83 @@ namespace ProjetLivInParis
             panel1.DoubleClick += panel1_DoubleClick;
             panel1.MouseClick += panel1_MouseClick;
             panel1.MouseEnter += (s, e) => panel1.Focus();
-            
+
             this.Load += FormGraphe_Load;
             this.Resize += FormGraphe_Resize;
-            FormGraphe_Resize(null, null);
 
+            this.Resize += (s, e) => {
+                algoSelector.Location = new Point(controlPanel.Width - algoSelector.Width - 20, 15);
+                searchButton.Location = new Point(algoSelector.Left - searchButton.Width - 20, 15);
+                searchBox.Location = new Point(searchButton.Left - searchBox.Width - 10, 15);
+            };
         }
+        #endregion
+
+        #region format idéal
+        private void FormGraphe_Resize(object sender, EventArgs e)
+        {
+            int spacing = 20;
+            int top = spacing;
+            int rightMargin = spacing;
+
+            searchBox.Location = new Point(this.ClientSize.Width - searchBox.Width - searchButton.Width - spacing * 2, top);
+            searchButton.Location = new Point(searchBox.Right + spacing, top);
+            algoSelector.Location = new Point(searchBox.Left, searchBox.Bottom + spacing);
+        }
+        private void CentrerGraphe()
+        {
+            int padding = 40;
+            double lonRange = maxLon - minLon;
+            double latRange = maxLat - minLat;
+            double baseZoom = Math.Min(panel1.Width / lonRange, panel1.Height / latRange);
+            float totalWidth = (float)(lonRange * baseZoom);
+            float totalHeight = (float)(latRange * baseZoom);
+            offset = new PointF((panel1.Width - totalWidth) / 2f - padding, (panel1.Height - totalHeight) / 2f - padding);
+        }
+        #endregion
+
+        #region souris
+        private void panel1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            float oldZoom = zoom;
+            zoom *= (e.Delta > 0) ? 1.1f : 0.9f;
+            float dx = e.X - panel1.Width / 2;
+            float dy = e.Y - panel1.Height / 2;
+            offset.X -= dx * (zoom - oldZoom);
+            offset.Y -= dy * (zoom - oldZoom);
+            panel1.Invalidate();
+        }
+        private void panel1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isDragging = true;
+                lastMousePos = e.Location;
+            }
+        }
+        private void panel1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                PointF delta = new PointF(e.X - lastMousePos.X, e.Y - lastMousePos.Y);
+                offset.X += delta.X;
+                offset.Y += delta.Y;
+                lastMousePos = e.Location;
+                panel1.Invalidate();
+            }
+        }
+        private void panel1_MouseUp(object sender, MouseEventArgs e)
+        {
+            isDragging = false;
+        }
+        private void panel1_DoubleClick(object sender, EventArgs e)
+        {
+            CentrerGraphe();
+            panel1.Invalidate();
+        }
+        #endregion
+
+        #region import
         private void FormGraphe_Load(object sender, EventArgs e)
         {
             string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
@@ -117,9 +217,9 @@ namespace ProjetLivInParis
             CentrerGraphe();
             panel1.Invalidate();
         }
+        #endregion
 
-
-        // Pour le traçage du graphe
+        #region tracé graphe
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
             if (graphe == null) return;
@@ -190,7 +290,6 @@ namespace ProjetLivInParis
                 yText += 18;
             }
         }
-
         private Point ConvertirCoordonnees(double lon, double lat)
         {
             int padding = 40;
@@ -202,7 +301,35 @@ namespace ProjetLivInParis
             double y = (maxLat - lat) * effectiveZoom + padding + offset.Y;
             return new Point((int)x, (int)y);
         }
+        private List<string> ExtraireTrajetParLigne(List<Noeud<Station>> chemin)
+        {
+            var lignesDetaillees = new List<string>();
 
+            if (chemin == null || chemin.Count < 2) return lignesDetaillees;
+
+            string ligneActuelle = chemin[0].Valeur.Ligne.ToString();
+            string depart = chemin[0].Valeur.Nom;
+
+            for (int i = 1; i < chemin.Count; i++)
+            {
+                var courant = chemin[i - 1];
+                var suivant = chemin[i];
+
+                if (suivant.Valeur.Ligne.ToString() != ligneActuelle)
+                {
+                    lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} -> {courant.Valeur.Nom}");
+                    depart = courant.Valeur.Nom;
+                    ligneActuelle = suivant.Valeur.Ligne.ToString();
+                }
+            }
+
+            lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} -> {chemin.Last().Valeur.Nom}");
+            lignesDetaillees.Add($"Algorithme utilisé : {algoSelector.SelectedItem.ToString()}");
+            return lignesDetaillees;
+        }
+        #endregion 
+
+        #region trajet entre 2 stations
         private void panel1_MouseClick(object sender, MouseEventArgs e)
         {
             foreach (var noeud in graphe.Noeuds)
@@ -267,60 +394,9 @@ namespace ProjetLivInParis
                 }
             }
         }
+        #endregion 
 
-        private void panel1_MouseWheel(object sender, MouseEventArgs e)
-        {
-            float oldZoom = zoom;
-            zoom *= (e.Delta > 0) ? 1.1f : 0.9f;
-            float dx = e.X - panel1.Width / 2;
-            float dy = e.Y - panel1.Height / 2;
-            offset.X -= dx * (zoom - oldZoom);
-            offset.Y -= dy * (zoom - oldZoom);
-            panel1.Invalidate();
-        }
-
-        private void panel1_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                isDragging = true;
-                lastMousePos = e.Location;
-            }
-        }
-
-        private void panel1_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (isDragging)
-            {
-                PointF delta = new PointF(e.X - lastMousePos.X, e.Y - lastMousePos.Y);
-                offset.X += delta.X;
-                offset.Y += delta.Y;
-                lastMousePos = e.Location;
-                panel1.Invalidate();
-            }
-        }
-
-        private void panel1_MouseUp(object sender, MouseEventArgs e)
-        {
-            isDragging = false;
-        }
-
-        private void panel1_DoubleClick(object sender, EventArgs e)
-        {
-            CentrerGraphe();
-            panel1.Invalidate();
-        }
-
-        private void CentrerGraphe()
-        {
-            int padding = 40;
-            double lonRange = maxLon - minLon;
-            double latRange = maxLat - minLat;
-            double baseZoom = Math.Min(panel1.Width / lonRange, panel1.Height / latRange);
-            float totalWidth = (float)(lonRange * baseZoom);
-            float totalHeight = (float)(latRange * baseZoom);
-            offset = new PointF((panel1.Width - totalWidth) / 2f - padding, (panel1.Height - totalHeight) / 2f - padding);
-        }
+        #region recherche
         private void SearchButton_Click(object sender, EventArgs e)
         {
             string texte = searchBox.Text.Trim().ToLower();
@@ -343,42 +419,6 @@ namespace ProjetLivInParis
                 MessageBox.Show("Aucune station trouvée.", "Recherche", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-        private List<string> ExtraireTrajetParLigne(List<Noeud<Station>> chemin)
-        {
-            var lignesDetaillees = new List<string>();
-
-            if (chemin == null || chemin.Count < 2) return lignesDetaillees;
-
-            string ligneActuelle = chemin[0].Valeur.Ligne.ToString();
-            string depart = chemin[0].Valeur.Nom;
-
-            for (int i = 1; i < chemin.Count; i++)
-            {
-                var courant = chemin[i - 1];
-                var suivant = chemin[i];
-
-                if (suivant.Valeur.Ligne.ToString() != ligneActuelle)
-                {
-                    lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} -> {courant.Valeur.Nom}");
-                    depart = courant.Valeur.Nom;
-                    ligneActuelle = suivant.Valeur.Ligne.ToString();
-                }
-            }
-
-            lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} -> {chemin.Last().Valeur.Nom}");
-            lignesDetaillees.Add($"Algorithme utilisé : {algoSelector.SelectedItem.ToString()}");
-            return lignesDetaillees;
-        }
-
-        private void FormGraphe_Resize(object sender, EventArgs e)
-        {
-            int spacing = 20;
-            int top = spacing;
-            int rightMargin = spacing;
-
-            searchBox.Location = new Point(this.ClientSize.Width - searchBox.Width - searchButton.Width - spacing * 2, top);
-            searchButton.Location = new Point(searchBox.Right + spacing, top);
-            algoSelector.Location = new Point(searchBox.Left, searchBox.Bottom + spacing);
-        }
+        #endregion
     }
 }

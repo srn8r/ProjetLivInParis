@@ -12,10 +12,14 @@ namespace ProjetLivInParis
 {
     public partial class Form_Utilisateur : Form
     {
+        #region propriétés
+
         private Button btnInscrire;
         private Button btnConnexion;
         private Label lblTitre;
+        #endregion
 
+        #region constructeur
         public Form_Utilisateur()
         {
             InitializeComponent();
@@ -61,6 +65,7 @@ namespace ProjetLivInParis
             btnConnexion.Click += BtnConnexion_Click;
             this.Controls.Add(btnConnexion);
         }
+        #endregion
 
         private void BtnConnexion_Click(object sender, EventArgs e)
         {
