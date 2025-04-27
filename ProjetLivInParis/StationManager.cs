@@ -46,7 +46,7 @@ namespace Project_LivInParis
                     double longitude = reader.GetDouble("Longitude");
                     double latitude = reader.GetDouble("Latitude");
 
-                    int ligne = reader.GetInt32("Ligne");
+                    string ligne = reader.GetString("Ligne");
 
                     Station station = new Station(stationId, nom, precedent, suivant, tempsEntreStr, tempsChangementStr, longitude, latitude, ligne);
 

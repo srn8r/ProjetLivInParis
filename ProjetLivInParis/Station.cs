@@ -16,9 +16,9 @@ namespace Project_LivInParis
         public string TempsDeChangement { get; set; }
         public double Longitude { get; set; }
         public double Latitude { get; set; }
-        public int Ligne { get; set; }
+        public string Ligne { get; set; }
 
-        public Station(int identifiant, string nom, string precedent, string suivant, string tempsEntre, string tempsChangement, double longitude, double latitude, int ligne)
+        public Station(int identifiant, string nom, string precedent, string suivant, string tempsEntre, string tempsChangement, double longitude, double latitude, string ligne)
         {
             Identifiant = identifiant;
             Nom = nom;

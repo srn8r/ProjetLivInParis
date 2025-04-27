@@ -79,7 +79,8 @@ namespace ProjetLivInParis
 
         private void BtnConnexion_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Fonctionnalité à venir !", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Form_Connecter fenetreConnexion = new Form_Connecter();
+            fenetreConnexion.ShowDialog();
         }
     }
 }

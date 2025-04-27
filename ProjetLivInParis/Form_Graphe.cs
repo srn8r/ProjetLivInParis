@@ -36,13 +36,25 @@ namespace ProjetLivInParis
         private TextBox searchBox;
         private Button searchButton;
 
-        private Dictionary<string, Color> couleursParLigne = new Dictionary<string, Color>()
-        {
-            { "1", Color.Gold }, { "2", Color.Blue }, { "3", Color.Brown }, { "4", Color.Purple },
-            { "5", Color.Orange }, { "6", Color.LightGreen }, { "7", Color.Pink }, { "8", Color.Gray },
-            { "9", Color.Olive }, { "10", Color.DarkGoldenrod }, { "11", Color.DarkOrange },
-            { "12", Color.SeaGreen }, { "13", Color.Teal }, { "14", Color.DarkViolet },
+        private Dictionary<string, Color> couleursParLigne = new Dictionary<string, Color>(){
+            { "1", Color.Gold },
+            { "2", Color.Blue },
+            { "3", Color.Brown },
+            { "3bis", Color.LightSkyBlue }, // Ajouté : 3bis
+            { "4", Color.Purple },
+            { "5", Color.Orange },
+            { "6", Color.LightGreen },
+            { "7", Color.Pink },
+            { "7bis", Color.LightPink }, // Ajouté : 7bis
+            { "8", Color.Gray },
+            { "9", Color.Olive },
+            { "10", Color.DarkGoldenrod },
+            { "11", Color.DarkOrange },
+            { "12", Color.SeaGreen },
+            { "13", Color.Teal },
+            { "14", Color.DarkViolet },
         };
+
         #endregion
 
         #region constructeur
@@ -307,7 +319,7 @@ namespace ProjetLivInParis
 
             if (chemin == null || chemin.Count < 2) return lignesDetaillees;
 
-            string ligneActuelle = chemin[0].Valeur.Ligne.ToString();
+            string ligneActuelle = chemin[0].Valeur.Ligne;
             string depart = chemin[0].Valeur.Nom;
 
             for (int i = 1; i < chemin.Count; i++)
@@ -315,11 +327,11 @@ namespace ProjetLivInParis
                 var courant = chemin[i - 1];
                 var suivant = chemin[i];
 
-                if (suivant.Valeur.Ligne.ToString() != ligneActuelle)
+                if (suivant.Valeur.Ligne != ligneActuelle)
                 {
                     lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} -> {courant.Valeur.Nom}");
                     depart = courant.Valeur.Nom;
-                    ligneActuelle = suivant.Valeur.Ligne.ToString();
+                    ligneActuelle = suivant.Valeur.Ligne;
                 }
             }
 
