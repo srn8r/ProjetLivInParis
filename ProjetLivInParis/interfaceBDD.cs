@@ -76,6 +76,7 @@ namespace Project_LivInParis
                     utilisateur.Adresse = reader.GetString("adresse");
                     utilisateur.Telephone = reader.GetString("telephone");
                     utilisateur.Email = reader.GetString("email");
+                    utilisateur.MotDePasse = reader.GetString("motdepasse");
 
                     utilisateurs.Add(utilisateur);
                 }

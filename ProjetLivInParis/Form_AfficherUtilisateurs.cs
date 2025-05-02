@@ -15,7 +15,7 @@ namespace ProjetLivInParis
         {
             InitializeComponent();
             this.Text = "Liste des Utilisateurs";
-            this.Size = new System.Drawing.Size(800, 500);
+            this.Size = new System.Drawing.Size(830, 550);
             this.StartPosition = FormStartPosition.CenterScreen;
 
             InitialiserComposants();
@@ -38,7 +38,7 @@ namespace ProjetLivInParis
             lvUtilisateurs.Columns.Add("Email", 180);
             lvUtilisateurs.Columns.Add("Téléphone", 120);
             lvUtilisateurs.Columns.Add("Type", 80);
-            lvUtilisateurs.Columns.Add("Détails", 120);
+            lvUtilisateurs.Columns.Add("Mot de Passe", 120);
 
             // Panel pour les boutons (en bas)
             Panel panelBoutons = new Panel();
@@ -142,7 +142,7 @@ namespace ProjetLivInParis
                     }
 
                     item.SubItems.Add(type);
-                    item.SubItems.Add(details);
+                    item.SubItems.Add(user.MotDePasse);
 
                     lvUtilisateurs.Items.Add(item);
                 }
