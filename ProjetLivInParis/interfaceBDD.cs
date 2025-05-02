@@ -116,6 +116,7 @@ namespace Project_LivInParis
                         Telephone = reader.GetString("Telephone"),
                         Email = reader.GetString("Email"),
                         TypeClient = reader.GetString("TypeClient"),
+                        MotDePasse = reader.GetString("motdepasse"),
                         NomEntreprise = reader.IsDBNull(reader.GetOrdinal("NomEntreprise")) ? string.Empty : reader.GetString("NomEntreprise"),
                         Referent = reader.IsDBNull(reader.GetOrdinal("Referent")) ? string.Empty : reader.GetString("Referent")
                     };
@@ -156,7 +157,8 @@ namespace Project_LivInParis
                         Prenom = reader.GetString("prenom"),
                         Adresse = reader.GetString("adresse"),
                         Telephone = reader.GetString("telephone"),
-                        Email = reader.GetString("email")
+                        Email = reader.GetString("email"),
+                        MotDePasse = reader.GetString("motdepasse")
                     };
 
                     cuisiniers.Add(cuisinier);

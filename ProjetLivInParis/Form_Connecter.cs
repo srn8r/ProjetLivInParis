@@ -150,9 +150,54 @@ namespace ProjetLivInParis
                                     MessageBox.Show($"Bienvenue {prenom} ! (Cuisinier)");
                                     new Form_Cuisinier(userId).ShowDialog();
                                 }
+
                                 else
                                 {
-                                    MessageBox.Show("Votre profil n'est pas encore défini comme client ou cuisinier.");
+                                    // L'utilisateur n'est ni client ni cuisinier
+                                    // Lui proposer de choisir un rôle
+                                    DialogResult dr = MessageBox.Show($"Bienvenue {prenom} ! Vous n'avez pas encore de rôle défini. Souhaitez-vous devenir client ?",
+                                        "Choix de rôle", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                                    if (dr == DialogResult.Yes)
+                                    {
+                                        // Créer un enregistrement dans la table client
+                                        string insertClientQuery = "INSERT INTO client (ID, TypeClient) VALUES (@ID, 'Particulier')";
+                                        using (MySqlCommand insertCmd = new MySqlCommand(insertClientQuery, conn))
+                                        {
+                                            insertCmd.Parameters.AddWithValue("@ID", userId);
+                                            insertCmd.ExecuteNonQuery();
+                                        }
+
+                                        MessageBox.Show("Votre profil a été défini comme client. Vous pouvez maintenant accéder à l'application.",
+                                            "Confirmation", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                        new Form_Client(userId).ShowDialog();
+                                    }
+                                    else
+                                    {
+                                        // Proposer de devenir cuisinier
+                                        dr = MessageBox.Show("Souhaitez-vous devenir cuisinier ?",
+                                            "Choix de rôle", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                                        if (dr == DialogResult.Yes)
+                                        {
+                                            // Créer un enregistrement dans la table cuisinier
+                                            string insertCuisinierQuery = "INSERT INTO cuisinier (ID) VALUES (@ID)";
+                                            using (MySqlCommand insertCmd = new MySqlCommand(insertCuisinierQuery, conn))
+                                            {
+                                                insertCmd.Parameters.AddWithValue("@ID", userId);
+                                                insertCmd.ExecuteNonQuery();
+                                            }
+
+                                            MessageBox.Show("Votre profil a été défini comme cuisinier. Vous pouvez maintenant accéder à l'application.",
+                                                "Confirmation", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                            new Form_Cuisinier(userId).ShowDialog();
+                                        }
+                                        else
+                                        {
+                                            MessageBox.Show("Vous n'avez choisi aucun rôle. Vous devrez choisir un rôle lors de votre prochaine connexion.",
+                                                "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                        }
+                                    }
                                 }
 
                                 this.Close();
