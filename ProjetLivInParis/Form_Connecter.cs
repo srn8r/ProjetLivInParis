@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.ApplicationServices;
 using MySql.Data.MySqlClient;
 
 
@@ -23,7 +24,7 @@ namespace ProjetLivInParis
         {
             InitializeComponent();
             this.Text = "Connexion";
-            this.Size = new Size(400, 300);
+            this.Size = new Size(400, 350);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.MediumPurple;
 
@@ -63,7 +64,7 @@ namespace ProjetLivInParis
                 Text = "Se connecter",
                 Width = 150,
                 Height = 40,
-                Location = new Point((this.ClientSize.Width - 150) / 2, 200),
+                Location = new Point((this.ClientSize.Width - 150) / 2, 230),
                 BackColor = Color.DarkSlateBlue,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10)
@@ -76,7 +77,7 @@ namespace ProjetLivInParis
                 Text = "Afficher le mot de passe",
                 ForeColor = Color.White,
                 AutoSize = true,
-                Location = new Point(txtPassword.Left, txtPassword.Top + 25)
+                Location = new Point(txtPassword.Left, txtPassword.Top + 35)
             };
             cbAfficherMotDePasse.CheckedChanged += CbAfficherMotDePasse_CheckedChanged;
             this.Controls.Add(cbAfficherMotDePasse);
@@ -100,22 +101,66 @@ namespace ProjetLivInParis
                 using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
                     conn.Open();
-                    string query = "SELECT Prenom FROM identite WHERE Email = @Email AND MotDePasse = @MotDePasse";
+                    string query = "SELECT ID, Prenom FROM identite WHERE Email = @Email AND MotDePasse = @MotDePasse";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@Email", email);
                         cmd.Parameters.AddWithValue("@MotDePasse", password);
 
-                        object result = cmd.ExecuteScalar();
-                        if (result != null)
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
-                            string prenom = result.ToString();
-                            MessageBox.Show($"Bienvenue {prenom} !", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            this.Close();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Email ou mot de passe incorrect.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            if (reader.Read())
+                            {
+                                int userId = reader.GetInt32("ID");
+                                string prenom = reader.GetString("Prenom");
+
+                                reader.Close(); // fermer avant les autres requêtes
+
+                                // Vérifier s'il est client
+                                bool estClient = false;
+                                string queryClient = "SELECT COUNT(*) FROM client WHERE ID = @ID";
+                                using (MySqlCommand cmdClient = new MySqlCommand(queryClient, conn))
+                                {
+                                    cmdClient.Parameters.AddWithValue("@ID", userId);
+                                    estClient = Convert.ToInt32(cmdClient.ExecuteScalar()) > 0;
+                                }
+
+                                // Vérifier s'il est cuisinier
+                                bool estCuisinier = false;
+                                string queryCuisinier = "SELECT COUNT(*) FROM cuisinier WHERE ID = @ID";
+                                using (MySqlCommand cmdCuisinier = new MySqlCommand(queryCuisinier, conn))
+                                {
+                                    cmdCuisinier.Parameters.AddWithValue("@ID", userId);
+                                    estCuisinier = Convert.ToInt32(cmdCuisinier.ExecuteScalar()) > 0;
+                                }
+
+                                // Diriger vers la bonne Form
+                                if (estClient && estCuisinier)
+                                {
+                                    MessageBox.Show($"Bienvenue {prenom} ! Vous êtes client et cuisinier.");
+                                    new Form_Choix(userId).ShowDialog();
+                                }
+                                else if (estClient)
+                                {
+                                    MessageBox.Show($"Bienvenue {prenom} ! (Client)");
+                                    new Form_Client(userId).ShowDialog();
+                                }
+                                else if (estCuisinier)
+                                {
+                                    MessageBox.Show($"Bienvenue {prenom} ! (Cuisinier)");
+                                    new Form_Cuisinier(userId).ShowDialog();
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Votre profil n'est pas encore défini comme client ou cuisinier.");
+                                }
+
+                                this.Close();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Email ou mot de passe incorrect.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
                         }
                     }
                 }
@@ -125,6 +170,7 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors de la connexion à la base de données : " + ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         private void CbAfficherMotDePasse_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox checkBox = sender as CheckBox;

@@ -32,7 +32,7 @@ namespace ProjetLivInParis
 
             lblTitre = new Label
             {
-                Text = "Bienvenue utilisateur",
+                Text = "Espace utilisateur",
                 Font = new Font("Segoe UI", 20, FontStyle.Bold),
                 ForeColor = Color.White,
                 AutoSize = true,
