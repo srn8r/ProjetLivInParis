@@ -21,6 +21,7 @@ namespace ProjetLivInParis
         private NumericUpDown numPrix;
         private TextBox txtRegime;
         private Button btnAjouter;
+        private NumericUpDown numQuantite;
 
         public Form_Cuisinier(int id)
         {
@@ -51,11 +52,20 @@ namespace ProjetLivInParis
             this.Controls.Add(txtNomPlat);
             top += 35;
 
-            // Type
-            this.Controls.Add(new Label { Text = "Type :", Top = top, Left = 20, Width = 180, ForeColor = Color.White });
-            txtType = new TextBox { Top = top, Left = 200, Width = 200 };
-            this.Controls.Add(txtType);
+            // Quantite
+            this.Controls.Add(new Label { Text = "Quantité :", Top = top, Left = 20, Width = 180, ForeColor = Color.White });
+            numQuantite = new NumericUpDown
+            {
+                Top = top,
+                Left = 200,
+                Width = 200,
+                Minimum = 1,
+                Maximum = 100,
+                Value = 1
+            };
+            this.Controls.Add(numQuantite);
             top += 35;
+
 
             // Date de fabrication
             this.Controls.Add(new Label { Text = "Date de fabrication :", Top = top, Left = 20, Width = 180, ForeColor = Color.White });
@@ -99,20 +109,18 @@ namespace ProjetLivInParis
 
         private void BtnAjouter_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtNomPlat.Text) ||
-                string.IsNullOrWhiteSpace(txtType.Text) ||
-                string.IsNullOrWhiteSpace(txtRegime.Text))
+            if (string.IsNullOrWhiteSpace(txtNomPlat.Text) || string.IsNullOrWhiteSpace(txtRegime.Text) || numQuantite.Value <= 0)
             {
                 MessageBox.Show("Veuillez remplir tous les champs.");
                 return;
             }
 
             string nomPlat = txtNomPlat.Text.Trim();
-            string type = txtType.Text.Trim();
+            string regime = txtRegime.Text.Trim();
+            int quantite = (int)numQuantite.Value;
             DateTime dateFab = dpFabrication.Value.Date;
             DateTime datePeremp = dpPeremption.Value.Date;
             decimal prix = numPrix.Value;
-            string regime = txtRegime.Text.Trim();
 
             try
             {
@@ -120,13 +128,13 @@ namespace ProjetLivInParis
                 using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
                     conn.Open();
-                    string insertPlat = @"INSERT INTO Plat (Nom, Type, date_de_fabrication, Date_de_peremption, Prix, Regime, CuisinierID)
-                                          VALUES (@Nom, @Type, @DateFab, @DatePeremp, @Prix, @Regime, @CuisinierID)";
+                    string insertPlat = @"INSERT INTO Plat (Nom, Quantite, date_de_fabrication, Date_de_peremption, Prix, Regime, CuisinierID)
+                                          VALUES (@Nom, @Quantite, @DateFab, @DatePeremp, @Prix, @Regime, @CuisinierID)";
 
                     using (MySqlCommand cmd = new MySqlCommand(insertPlat, conn))
                     {
                         cmd.Parameters.AddWithValue("@Nom", nomPlat);
-                        cmd.Parameters.AddWithValue("@Type", type);
+                        cmd.Parameters.AddWithValue("@Quantite", quantite);
                         cmd.Parameters.AddWithValue("@DateFab", dateFab);
                         cmd.Parameters.AddWithValue("@DatePeremp", datePeremp);
                         cmd.Parameters.AddWithValue("@Prix", prix);

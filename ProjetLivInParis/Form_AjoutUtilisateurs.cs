@@ -217,7 +217,7 @@ namespace ProjetLivInParis
             }
 
             // Validation de l'email (contient @ et pas de majuscules)
-            string email = txtTelephone.Text.Trim();
+            string email = txtEmail.Text.Trim();
             if (!email.Contains("@") || email != email.ToLower())
             {
                 MessageBox.Show("L'email doit contenir un @ et ne pas avoir de majuscules.",
