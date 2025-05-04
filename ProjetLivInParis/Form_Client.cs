@@ -23,7 +23,6 @@ namespace ProjetLivInParis
         private Dictionary<string, PlatInfo> informationsPlats = new Dictionary<string, PlatInfo>();
         private string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
 
-        // Structure pour stocker les informations d'un plat
         private class PlatInfo
         {
             public int Id { get; set; }
@@ -49,12 +48,10 @@ namespace ProjetLivInParis
             this.BackColor = Color.LightSteelBlue;
             userId = id;
 
-            // Initialiser le gestionnaire de stations pour calculer les temps de trajet
             stationManager = new StationManager(connectionString);
             stationManager.ChargerStationsDepuisBDD();
             stationManager.LierCorrespondances();
 
-            // Récupérer l'adresse du client (station de métro)
             string clientAdresse = "";
 
             try
@@ -81,7 +78,6 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors de la récupération des informations client : " + ex.Message);
             }
 
-            // Créer les contrôles UI
             Label titre = new Label
             {
                 Text = "Liste des plats disponibles",
@@ -92,7 +88,6 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(titre);
 
-            // Créer une ListView au lieu d'une ListBox pour plus de détails
             listPlats = new ListView
             {
                 Width = 650,
@@ -105,21 +100,17 @@ namespace ProjetLivInParis
                 MultiSelect = false
             };
 
-            // Ajouter les colonnes
             listPlats.Columns.Add("Nom du plat", 200);
             listPlats.Columns.Add("Type", 100);
             listPlats.Columns.Add("Prix (€)", 80);
             listPlats.Columns.Add("Régime", 100);
             listPlats.Columns.Add("Temps de livraison", 150);
 
-            // Ajouter des gestionnaires d'événements
             listPlats.DoubleClick += ListPlats_DoubleClick;
             listPlats.Click += ListPlats_Click;
 
-            // Charger les plats depuis la base de données
             ChargerPlats(clientAdresse);
 
-            // Bouton Commander
             btnCommander = new Button
             {
                 Text = "Commander",
@@ -133,7 +124,6 @@ namespace ProjetLivInParis
             };
             btnCommander.Click += BtnCommander_Click;
 
-            // Bouton Voir Détails
             btnVoirDetails = new Button
             {
                 Text = "Voir détails",
@@ -180,10 +170,9 @@ namespace ProjetLivInParis
                             int cuisinierId = reader.GetInt32("CuisinierID");
                             string cuisinierAdresse = reader.GetString("Adresse");
 
-                            // Calculer le temps de trajet et le chemin entre le cuisinier et le client
                             var (tempsTrajet, chemin) = CalculerTrajet(cuisinierAdresse, clientAdresse);
 
-                            // Créer un objet PlatInfo pour stocker toutes les informations
+ 
                             PlatInfo infos = new PlatInfo
                             {
                                 Id = platId,
@@ -202,13 +191,12 @@ namespace ProjetLivInParis
 
                             informationsPlats.Add(platNom, infos);
 
-                            // Ajouter à la ListView
                             ListViewItem item = new ListViewItem(platNom);
                             item.SubItems.Add(platType);
                             item.SubItems.Add(prix.ToString("0.00"));
                             item.SubItems.Add(regime);
                             item.SubItems.Add(tempsTrajet + " min");
-                            item.Tag = platNom; // Stocker le nom du plat pour référence future
+                            item.Tag = platNom; 
 
                             listPlats.Items.Add(item);
                         }
@@ -228,7 +216,7 @@ namespace ProjetLivInParis
                 Form detailsForm = new Form
                 {
                     Text = $"Détails du plat: {platNom}",
-                    Size = new Size(400, 350),
+                    Size = new Size(450, 380),  
                     StartPosition = FormStartPosition.CenterParent,
                     FormBorderStyle = FormBorderStyle.FixedDialog,
                     MaximizeBox = false,
@@ -241,11 +229,17 @@ namespace ProjetLivInParis
                     Dock = DockStyle.Fill,
                     Padding = new Padding(10),
                     ColumnCount = 2,
-                    RowCount = 8
+                    RowCount = 8,
+                    AutoSize = true  
                 };
 
-                layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40));
-                layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60));
+                layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200)); 
+                layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); 
+
+                for (int i = 0; i < 8; i++)
+                {
+                    layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 35));
+                }
 
                 AddDetailRow(layout, 0, "Nom:", infos.Nom);
                 AddDetailRow(layout, 1, "Type:", infos.Type);
@@ -253,7 +247,7 @@ namespace ProjetLivInParis
                 AddDetailRow(layout, 3, "Date de péremption:", infos.DatePeremption.ToShortDateString());
                 AddDetailRow(layout, 4, "Prix:", infos.Prix.ToString("0.00") + " €");
                 AddDetailRow(layout, 5, "Régime:", infos.Regime);
-                AddDetailRow(layout, 6, "Station du cuisinier:", infos.CuisinierAdresse);
+                AddDetailRow(layout, 6, "Adresse du cuisinier:", infos.CuisinierAdresse);
 
                 Button btnVoirTrajet = new Button
                 {
@@ -300,10 +294,8 @@ namespace ProjetLivInParis
                 return;
             }
 
-            // Récupérer les segments par ligne pour l'affichage
             var segmentsParLigne = ExtraireTrajetParLigne(infos.Chemin);
 
-            // Créer un nouveau formulaire pour afficher le trajet
             Form formTrajet = new Form
             {
                 Text = $"Trajet de livraison: {platNom}",
@@ -312,7 +304,6 @@ namespace ProjetLivInParis
                 AutoScroll = true // Activer le défilement si nécessaire
             };
 
-            // Panel avec autoscroll
             Panel panelTrajet = new Panel
             {
                 Dock = DockStyle.Fill,
@@ -320,27 +311,25 @@ namespace ProjetLivInParis
                 AutoScroll = true
             };
 
-            // Dictionnaire des couleurs par ligne
             Dictionary<string, Color> couleursParLigne = new Dictionary<string, Color>(){
-        { "1", Color.Gold },
-        { "2", Color.Blue },
-        { "3", Color.Brown },
-        { "3bis", Color.LightSkyBlue },
-        { "4", Color.Purple },
-        { "5", Color.Orange },
-        { "6", Color.LightGreen },
-        { "7", Color.Pink },
-        { "7bis", Color.LightPink },
-        { "8", Color.Gray },
-        { "9", Color.Olive },
-        { "10", Color.DarkGoldenrod },
-        { "11", Color.DarkOrange },
-        { "12", Color.SeaGreen },
-        { "13", Color.Teal },
-        { "14", Color.DarkViolet },
-    };
+                { "1", Color.Gold },
+                { "2", Color.Blue },
+                { "3", Color.Brown },
+                { "3bis", Color.LightSkyBlue },
+                { "4", Color.Purple },
+                { "5", Color.Orange },
+                { "6", Color.LightGreen },
+                { "7", Color.Pink },
+                { "7bis", Color.LightPink },
+                { "8", Color.Gray },
+                { "9", Color.Olive },
+                { "10", Color.DarkGoldenrod },
+                { "11", Color.DarkOrange },
+                { "12", Color.SeaGreen },
+                { "13", Color.Teal },
+                { "14", Color.DarkViolet },
+            };
 
-            // Dessiner le trajet
             panelTrajet.Paint += (s, e) =>
             {
                 Graphics g = e.Graphics;
@@ -349,39 +338,34 @@ namespace ProjetLivInParis
                 Font numLigneFont = new Font("Segoe UI", 9, FontStyle.Bold);
                 Font titreFont = new Font("Segoe UI", 12, FontStyle.Bold);
 
-                // Calculer paramètres d'affichage
-                int paddingLateral = 80; // Plus grand pour les noms de stations
-                int hauteurSegment = 90; // Plus d'espace vertical entre segments
+                int paddingLateral = 80; 
+                int hauteurSegment = 90;
                 int largeurTotale = panelTrajet.ClientSize.Width - (paddingLateral * 2);
-                int rayonStation = 8; // Stations un peu plus grandes
+                int rayonStation = 8; 
 
-                // Zone de titre
+   
                 int hauteurTitre = 50;
                 Rectangle zoneHeader = new Rectangle(10, 10, panelTrajet.ClientSize.Width - 20, hauteurTitre);
                 g.FillRectangle(new SolidBrush(Color.FromArgb(240, 240, 250)), zoneHeader);
                 g.DrawRectangle(Pens.LightGray, zoneHeader);
 
-                // Afficher le temps total
+        
                 g.DrawString($"Temps de trajet: {infos.TempsTrajet} minutes",
                     titreFont, Brushes.DarkBlue, zoneHeader.X + 10, zoneHeader.Y + 15);
 
-                int yPosition = hauteurTitre + 30; // Position de départ après le titre
+                int yPosition = hauteurTitre + 30; 
 
-                // Set pour suivre les segments déjà affichés afin d'éviter les doublons
                 HashSet<string> segmentsAffichés = new HashSet<string>();
 
-                // Pour chaque segment de ligne, dessiner un segment horizontal
                 foreach (var segment in segmentsParLigne)
                 {
                     try
                     {
-                        // Vérifier si ce segment a déjà été affiché (pour éviter les doublons)
                         if (segmentsAffichés.Contains(segment))
                             continue;
 
                         segmentsAffichés.Add(segment);
 
-                        // Extraire les informations du segment
                         string[] parts = segment.Split(':');
                         if (parts.Length != 2) continue;
 
@@ -392,13 +376,11 @@ namespace ProjetLivInParis
                         string stationDepart = stations[0].Trim();
                         string stationArrivee = stations[1].Trim();
 
-                        // Mesurer la taille des textes pour un meilleur positionnement
                         SizeF tailleDepart = g.MeasureString(stationDepart, stationFont);
                         SizeF tailleArrivee = g.MeasureString(stationArrivee, stationFont);
                         SizeF tailleLigne = g.MeasureString($"Ligne {ligne}", numLigneFont);
 
-                        // Couleur de la ligne
-                        Color couleurLigne = Color.Red; // par défaut
+                        Color couleurLigne = Color.Red;
                         if (couleursParLigne.TryGetValue(ligne, out Color couleur))
                             couleurLigne = couleur;
 
@@ -484,13 +466,11 @@ namespace ProjetLivInParis
         {
             var graphe = stationManager.ObtenirGraphe();
 
-            // Trouver les nœuds correspondant aux stations
             var noeudCuisinier = graphe.Noeuds.FirstOrDefault(n => n.Valeur.Nom == stationCuisinierNom);
             var noeudClient = graphe.Noeuds.FirstOrDefault(n => n.Valeur.Nom == stationClientNom);
 
             if (noeudCuisinier != null && noeudClient != null)
             {
-                // Calculer le plus court chemin
                 var chemin = graphe.CheminCourt(noeudCuisinier, noeudClient);
 
                 if (chemin != null && chemin.Count > 0)
@@ -510,8 +490,7 @@ namespace ProjetLivInParis
                 }
             }
 
-            // Valeur par défaut si le calcul n'est pas possible
-            return (new Random().Next(15, 45), new List<Noeud<Station>>()); // Simuler un temps entre 15 et 45 minutes
+            return (new Random().Next(15, 45), new List<Noeud<Station>>()); 
         }
 
         private void BtnCommander_Click(object sender, EventArgs e)
@@ -525,7 +504,6 @@ namespace ProjetLivInParis
             string platNom = listPlats.SelectedItems[0].Text;
             if (informationsPlats.TryGetValue(platNom, out PlatInfo infos))
             {
-                // Enregistrer la commande dans la base de données
                 try
                 {
                     using (MySqlConnection conn = new MySqlConnection(connectionString))
@@ -563,13 +541,11 @@ namespace ProjetLivInParis
 
         private void ListPlats_Click(object sender, EventArgs e)
         {
-            // Vérifier si l'utilisateur a cliqué sur la colonne temps de livraison
             if (listPlats.SelectedItems.Count > 0)
             {
                 var mousePos = listPlats.PointToClient(MousePosition);
                 var hitTest = listPlats.HitTest(mousePos);
 
-                // Si le clic est sur un sous-élément (colonne) et c'est la colonne de temps
                 if (hitTest.SubItem != null && hitTest.Item.SubItems.IndexOf(hitTest.SubItem) == 4)
                 {
                     string platNom = hitTest.Item.Text;
@@ -596,7 +572,6 @@ namespace ProjetLivInParis
                 return;
             }
 
-            // Ajouter cette partie manquante pour afficher les détails
             string platNom = listPlats.SelectedItems[0].Text;
             AfficherDetailsPlat(platNom);
         }
