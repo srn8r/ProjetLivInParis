@@ -256,10 +256,12 @@ namespace ProjetLivInParis
             // Chemin le plus court
             if (chemin.Count > 1)
             {
+                
                 for (int i = 0; i < chemin.Count - 1; i++)
                 {
                     var actuel = chemin[i];
                     var suivant = chemin[i + 1];
+
 
                     var ligne = actuel.Valeur.Ligne.ToString();
                     if (!couleursParLigne.TryGetValue(ligne, out Color couleur))
@@ -317,7 +319,8 @@ namespace ProjetLivInParis
         {
             var lignesDetaillees = new List<string>();
 
-            if (chemin == null || chemin.Count < 2) return lignesDetaillees;
+            if (chemin == null || chemin.Count < 2)
+                return lignesDetaillees;
 
             string ligneActuelle = chemin[0].Valeur.Ligne;
             string depart = chemin[0].Valeur.Nom;
@@ -327,18 +330,30 @@ namespace ProjetLivInParis
                 var courant = chemin[i - 1];
                 var suivant = chemin[i];
 
-                if (suivant.Valeur.Ligne != ligneActuelle)
+                // Si on change de ligne OU si on arrive au dernier arrêt
+                bool ligneChange = suivant.Valeur.Ligne != ligneActuelle;
+                bool dernierSegment = i == chemin.Count - 1;
+
+                if (ligneChange || dernierSegment)
                 {
-                    lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} -> {courant.Valeur.Nom}");
-                    depart = courant.Valeur.Nom;
+                    string destination = suivant.Valeur.Nom;
+
+                    // ⚠️ Évite de créer des segments où départ == arrivée (cas des doubles)
+                    if (depart != destination)
+                    {
+                        lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} -> {destination}");
+                    }
+
+                    depart = suivant.Valeur.Nom;
                     ligneActuelle = suivant.Valeur.Ligne;
                 }
             }
 
-            lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} -> {chemin.Last().Valeur.Nom}");
-            lignesDetaillees.Add($"Algorithme utilisé : {algoSelector.SelectedItem.ToString()}");
+            lignesDetaillees.Add($"Algorithme utilisé : {algoSelector.SelectedItem?.ToString() ?? "?"}");
+
             return lignesDetaillees;
         }
+
         #endregion 
 
         #region trajet entre 2 stations
