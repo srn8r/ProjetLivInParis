@@ -115,7 +115,7 @@ namespace ProjetLivInParis
             txtReferent = new TextBox() { Left = 130, Top = top, Width = 300 };
             top += 50;
 
-            btnAjouter = new Button() { Text = "Ajouter", Left = 180, Top = top, Width = 120 };
+            btnAjouter = new Button() { Text = "Ajouter", Left = 180, Top = top, Width = 120 , Height = 40};
             btnAjouter.Click += BtnAjouter_Click;
 
             Controls.AddRange(new Control[]
