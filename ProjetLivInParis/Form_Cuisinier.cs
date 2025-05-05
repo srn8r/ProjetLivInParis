@@ -214,7 +214,7 @@ namespace ProjetLivInParis
             numQuantite.Value = 1;
             dpFabrication.Value = DateTime.Now;
             dpPeremption.Value = DateTime.Now.AddDays(1);
-            numPrix.Value = 0;
+            numPrix.Value = numPrix.Minimum; 
             txtRegime.Clear();
             txtNomPlat.Focus();
         }

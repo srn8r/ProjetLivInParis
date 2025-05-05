@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace ProjetLivInParis
         {
             public int Id { get; set; }
             public string Nom { get; set; }
-            public string Quantite { get; set; }
+            public int Quantite { get; set; }
             public DateTime DateFabrication { get; set; }
             public DateTime DatePeremption { get; set; }
             public decimal Prix { get; set; }
@@ -146,40 +147,45 @@ namespace ProjetLivInParis
         {
             try
             {
+                listPlats.Items.Clear();
+                informationsPlats.Clear();
+
                 using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
                     conn.Open();
                     string query = @"
-                        SELECT p.PlatID, p.Nom, p.Quantite, p.date_de_fabrication, p.Date_de_peremption, 
-                               p.Prix, p.Regime, p.CuisinierID, u.Adresse
-                        FROM Plat p
-                        JOIN Identite u ON p.CuisinierID = u.ID
-                        WHERE p.Date_de_peremption >= CURDATE() AND p.CommandeID IS NULL
-";
+            SELECT p.PlatID, p.Nom, p.Quantite, p.date_de_fabrication, p.Date_de_peremption, 
+                   p.Prix, p.Regime, p.CuisinierID, u.Adresse
+            FROM Plat p
+            JOIN Identite u ON p.CuisinierID = u.ID
+            WHERE p.Date_de_peremption >= CURDATE() AND p.CommandeID IS NULL AND p.Quantite > 0";
+
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
                             int platId = reader.GetInt32("PlatID");
-                            string platNom = reader.GetString("Nom");
+                            string nom = reader.GetString("Nom");
                             int quantite = reader.GetInt32("Quantite");
-                            DateTime dateFab = reader.GetDateTime("date_de_fabrication");
-                            DateTime datePer = reader.GetDateTime("Date_de_peremption");
+                            DateTime dateFabrication = reader.GetDateTime("date_de_fabrication");
+                            DateTime datePeremption = reader.GetDateTime("Date_de_peremption");
                             decimal prix = reader.GetDecimal("Prix");
                             string regime = reader.GetString("Regime");
                             int cuisinierId = reader.GetInt32("CuisinierID");
                             string cuisinierAdresse = reader.GetString("Adresse");
 
+                            // Calculer le temps de trajet entre les stations
                             var (tempsTrajet, chemin) = CalculerTrajet(cuisinierAdresse, clientAdresse);
 
- 
-                            PlatInfo infos = new PlatInfo
+                            // Stocker les informations complètes du plat
+                            PlatInfo platInfo = new PlatInfo
                             {
                                 Id = platId,
-                                Nom = platNom,
-                                DateFabrication = dateFab,
-                                DatePeremption = datePer,
+                                Nom = nom,
+                                Quantite = quantite,
+                                DateFabrication = dateFabrication,
+                                DatePeremption = datePeremption,
                                 Prix = prix,
                                 Regime = regime,
                                 CuisinierID = cuisinierId,
@@ -189,21 +195,16 @@ namespace ProjetLivInParis
                                 Chemin = chemin
                             };
 
-                            informationsPlats.Add(platNom, infos);
+                            informationsPlats[nom] = platInfo;
 
-                            ListViewItem item = new ListViewItem(platNom);
+                            // Ajouter le plat à la liste
+                            ListViewItem item = new ListViewItem(nom);
                             item.SubItems.Add(quantite.ToString());
                             item.SubItems.Add(prix.ToString("0.00"));
                             item.SubItems.Add(regime);
-                            item.SubItems.Add(tempsTrajet + " min");
-                            item.Tag = platNom; 
+                            item.SubItems.Add(tempsTrajet + " minutes");
 
                             listPlats.Items.Add(item);
-                            if (listPlats.Items.Count == 0)
-                            {
-                                MessageBox.Show("Il n'y a plus de plats disponibles pour le moment.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
-
                         }
                     }
                 }
@@ -213,7 +214,6 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors du chargement des plats : " + ex.Message);
             }
         }
-
         private void AfficherDetailsPlat(string platNom)
         {
             if (informationsPlats.TryGetValue(platNom, out PlatInfo infos))
@@ -577,70 +577,94 @@ namespace ProjetLivInParis
                 }
             }
 
-
             // 👌 Maintenant on est sûr que l'adresse est bonne ➔ passer la commande
             try
             {
                 using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
                     conn.Open();
-                    string insertCmd = @"INSERT INTO Commande (DateCommande, AdresseLivraison, PrixTotal, Statut, ModePaiement, ClientID)
-                                    VALUES (NOW(), @AdresseLivraison, @PrixTotal, 'En préparation', 'En attente', @ClientID)";
-
-                    using (MySqlCommand cmd = new MySqlCommand(insertCmd, conn))
+                    using (MySqlTransaction transaction = conn.BeginTransaction())
                     {
-                        cmd.Parameters.AddWithValue("@AdresseLivraison", infos.ClientAdresse);
-                        cmd.Parameters.AddWithValue("@PrixTotal", infos.Prix);
-                        cmd.Parameters.AddWithValue("@ClientID", userId);
-
-                        int rows = cmd.ExecuteNonQuery();
-                        if (rows > 0)
+                        try
                         {
-                            long commandeId = cmd.LastInsertedId;
+                            // 1. Insérer la commande
+                            string insertCmd = @"INSERT INTO Commande (DateCommande, AdresseLivraison, PrixTotal, Statut, ModePaiement, ClientID)
+                                        VALUES (NOW(), @AdresseLivraison, @PrixTotal, 'En préparation', 'En attente', @ClientID)";
 
-                            string updatePlat = @"
-                                    UPDATE Plat 
-                                    SET Quantite = Quantite - 1, 
-                                    CommandeID = CASE WHEN Quantite = 1 THEN @CommandeID ELSE CommandeID END
-                                    WHERE PlatID = @PlatID";
-                            using (MySqlCommand cmdUpdate = new MySqlCommand(updatePlat, conn))
+                            using (MySqlCommand cmd = new MySqlCommand(insertCmd, conn, transaction))
                             {
-                                cmdUpdate.Parameters.AddWithValue("@CommandeID", commandeId);
-                                cmdUpdate.Parameters.AddWithValue("@PlatID", infos.Id);
-                                cmdUpdate.ExecuteNonQuery();
-                            }
+                                cmd.Parameters.AddWithValue("@AdresseLivraison", infos.ClientAdresse);
+                                cmd.Parameters.AddWithValue("@PrixTotal", infos.Prix);
+                                cmd.Parameters.AddWithValue("@ClientID", userId);
 
-                            MessageBox.Show($"Commande enregistrée pour le plat : {platNom}\nTemps de livraison estimé : {infos.TempsTrajet} minutes",
-                                "Commande réussie", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                int rows = cmd.ExecuteNonQuery();
+                                if (rows <= 0)
+                                {
+                                    throw new Exception("Échec de création de la commande");
+                                }
 
-                           
+                                long commandeId = cmd.LastInsertedId;
 
-                            listPlats.Items.Clear();
-                            informationsPlats.Clear();  // Très important aussi pour ne pas garder l'ancien dictionnaire
-                            ChargerPlats(infos.ClientAdresse);  // Recharge la liste proprement !
+                                // 2. Créer un nouveau plat pour la commande avec quantité=1
+                                string insertPlatCommande = @"INSERT INTO Plat (Nom, Quantite, date_de_fabrication, Date_de_peremption, Prix, Regime, CuisinierID, CommandeID)
+                                                    SELECT Nom, 1, date_de_fabrication, Date_de_peremption, Prix, Regime, CuisinierID, @CommandeID
+                                                    FROM Plat WHERE PlatID = @PlatID";
 
-                            if (listPlats.Items.Count == 0)
-                            {
-                                MessageBox.Show("Il n'y a plus de plats disponibles pour le moment.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                btnCommander.Enabled = false;
-                                btnVoirDetails.Enabled = false;
+                                using (MySqlCommand cmdInsertPlat = new MySqlCommand(insertPlatCommande, conn, transaction))
+                                {
+                                    cmdInsertPlat.Parameters.AddWithValue("@CommandeID", commandeId);
+                                    cmdInsertPlat.Parameters.AddWithValue("@PlatID", infos.Id);
+                                    cmdInsertPlat.ExecuteNonQuery();
+                                }
+
+                                // 3. Mettre à jour la quantité du plat original
+                                string updatePlat = @"UPDATE Plat SET Quantite = Quantite - 1 WHERE PlatID = @PlatID";
+                                using (MySqlCommand cmdUpdate = new MySqlCommand(updatePlat, conn, transaction))
+                                {
+                                    cmdUpdate.Parameters.AddWithValue("@PlatID", infos.Id);
+                                    cmdUpdate.ExecuteNonQuery();
+                                }
+
+                                // 4. Supprimer les plats avec quantité 0
+                                string deletePlatZeroQuantity = @"DELETE FROM Plat WHERE Quantite <= 0 AND CommandeID IS NULL";
+                                using (MySqlCommand cmdDelete = new MySqlCommand(deletePlatZeroQuantity, conn, transaction))
+                                {
+                                    cmdDelete.ExecuteNonQuery();
+                                }
+
+                                // Valider la transaction
+                                transaction.Commit();
+
+                                MessageBox.Show($"Commande enregistrée pour le plat : {platNom}\nTemps de livraison estimé : {infos.TempsTrajet} minutes",
+                                    "Commande réussie", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                // Rafraîchir la liste des plats
+                                listPlats.Items.Clear();
+                                informationsPlats.Clear();  // Très important aussi pour ne pas garder l'ancien dictionnaire
+                                ChargerPlats(infos.ClientAdresse);  // Recharge la liste proprement !
+
+                                if (listPlats.Items.Count == 0)
+                                {
+                                    MessageBox.Show("Il n'y a plus de plats disponibles pour le moment.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    btnCommander.Enabled = false;
+                                    btnVoirDetails.Enabled = false;
+                                }
                             }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            MessageBox.Show("Erreur lors de l'enregistrement de la commande.",
-                                "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            // En cas d'erreur, annuler la transaction
+                            transaction.Rollback();
+                            throw new Exception("Erreur lors de la transaction : " + ex.Message);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Erreur lors de la commande : " + ex.Message);
+                MessageBox.Show("Erreur lors de la commande : " + ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
         private void ListPlats_Click(object sender, EventArgs e)
         {
             if (listPlats.SelectedItems.Count > 0)
