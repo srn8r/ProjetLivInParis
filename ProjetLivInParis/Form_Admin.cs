@@ -16,8 +16,8 @@ namespace ProjetLivInParis
         #region propriétés
 
         private Label lblTitre;
-        private Label lblSousTitre;
-        private Button btnVoirUtilisateurs, btnAfficherGraphe;
+        private Button btnVoirUtilisateurs, btnAfficherGraphe, btnVoirCommandes;
+
         #endregion
 
         #region constructeur
@@ -26,7 +26,7 @@ namespace ProjetLivInParis
             InitializeComponent();
 
             this.Text = "Espace Administrateur";
-            this.Size = new Size(600, 400);
+            this.Size = new Size(600, 450);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.MediumPurple;
             this.Resize += FormAdmin_Resize;
@@ -47,7 +47,7 @@ namespace ProjetLivInParis
             {
                 Text = "Voir les utilisateurs",
                 Size = new Size(220, 50),
-                Location = new Point((this.ClientSize.Width - 220) / 2, 150),
+                Location = new Point((this.ClientSize.Width - 220) / 2, 140),
                 BackColor = Color.DarkSlateBlue,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 12),
@@ -56,12 +56,31 @@ namespace ProjetLivInParis
             btnVoirUtilisateurs.Click += (s, e) => new Form_AfficherUtilisateurs().ShowDialog();
             this.Controls.Add(btnVoirUtilisateurs);
 
+            // Bouton Voir Commandes ✅ (NOUVEAU)
+            btnVoirCommandes = new Button
+            {
+                Text = "Voir les commandes",
+                Size = new Size(220, 50),
+                Location = new Point((this.ClientSize.Width - 220) / 2, 210),
+                BackColor = Color.DarkSlateBlue,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 12),
+                Cursor = Cursors.Hand
+            };
+            btnVoirCommandes.Click += (s, e) =>
+            {
+                // 👉 Ouvre la future form admin des commandes
+                Form_AfficherCommandes formCommandes = new Form_AfficherCommandes();
+                formCommandes.ShowDialog();
+            };
+            this.Controls.Add(btnVoirCommandes);
+
             // Bouton Afficher le Graphe
             btnAfficherGraphe = new Button
             {
                 Text = "Afficher le graphe",
                 Size = new Size(220, 50),
-                Location = new Point((this.ClientSize.Width - 220) / 2, 220),
+                Location = new Point((this.ClientSize.Width - 220) / 2, 280),
                 BackColor = Color.DarkSlateBlue,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 12),
@@ -69,7 +88,7 @@ namespace ProjetLivInParis
             };
             btnAfficherGraphe.Click += (s, e) =>
             {
-                Form_Graphe grapheForm = new Form_Graphe(); 
+                Form_Graphe grapheForm = new Form_Graphe();
                 grapheForm.ShowDialog();
             };
             this.Controls.Add(btnAfficherGraphe);
@@ -80,8 +99,9 @@ namespace ProjetLivInParis
         private void FormAdmin_Resize(object sender, EventArgs e)
         {
             lblTitre.Location = new Point((this.ClientSize.Width - lblTitre.Width) / 2, 50);
-            btnVoirUtilisateurs.Location = new Point((this.ClientSize.Width - btnVoirUtilisateurs.Width) / 2, 150);
-            btnAfficherGraphe.Location = new Point((this.ClientSize.Width - btnAfficherGraphe.Width) / 2, 220);
+            btnVoirUtilisateurs.Location = new Point((this.ClientSize.Width - btnVoirUtilisateurs.Width) / 2, 140);
+            btnVoirCommandes.Location = new Point((this.ClientSize.Width - btnVoirCommandes.Width) / 2, 210);
+            btnAfficherGraphe.Location = new Point((this.ClientSize.Width - btnAfficherGraphe.Width) / 2, 280);
         }
         #endregion
     }

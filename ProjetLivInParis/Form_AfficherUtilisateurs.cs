@@ -6,17 +6,21 @@ namespace ProjetLivInParis
     public partial class Form_AfficherUtilisateurs : Form
     {
         private ListView lvUtilisateurs;
-        private Button btnFermer;
-        private Button btnSupprimer;
         private ComboBox cbFiltre;
-        private Label lblFiltre;
+        private Button btnFermer, btnSupprimer, btnEnregistrer;
+        private Label lblTitre;
+
+        // Champs d'édition
+        private TextBox txtNom, txtPrenom, txtEmail, txtTel, txtMdp, txtAdresse;
 
         public Form_AfficherUtilisateurs()
         {
             InitializeComponent();
-            this.Text = "Liste des Utilisateurs";
-            this.Size = new System.Drawing.Size(830, 550);
+            this.Text = "Gestion des Utilisateurs";
+            this.Size = new Size(1000, 750);
             this.StartPosition = FormStartPosition.CenterScreen;
+            this.BackColor = Color.MediumPurple;
+            this.Font = new Font("Segoe UI", 10);
 
             InitialiserComposants();
             ChargerUtilisateurs();
@@ -24,72 +28,124 @@ namespace ProjetLivInParis
 
         private void InitialiserComposants()
         {
-            // ListView pour les utilisateurs
-            lvUtilisateurs = new ListView();
-            lvUtilisateurs.Dock = DockStyle.Fill;
-            lvUtilisateurs.View = View.Details;
-            lvUtilisateurs.FullRowSelect = true;
-            lvUtilisateurs.GridLines = true;
+            // 🔥 Titre
+            lblTitre = new Label
+            {
+                Text = "Gestion des Utilisateurs",
+                Font = new Font("Segoe UI", 20, FontStyle.Bold),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(20, 20)
+            };
+            this.Controls.Add(lblTitre);
 
-            // Ajout des colonnes
+            // 🔎 ComboBox Filtre
+            cbFiltre = new ComboBox
+            {
+                Items = { "Tous", "Clients", "Cuisiniers" },
+                SelectedIndex = 0,
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Location = new Point(25, 70),
+                Width = 200,
+                Font = new Font("Segoe UI", 10)
+            };
+            cbFiltre.SelectedIndexChanged += CbFiltre_SelectedIndexChanged;
+            this.Controls.Add(cbFiltre);
+
+            // 🗒️ ListView
+            lvUtilisateurs = new ListView
+            {
+                Location = new Point(25, 110),
+                Width = 930,
+                Height = 320,
+                View = View.Details,
+                FullRowSelect = true,
+                GridLines = true,
+                Font = new Font("Segoe UI", 10)
+            };
+
             lvUtilisateurs.Columns.Add("ID", 50);
             lvUtilisateurs.Columns.Add("Nom", 120);
             lvUtilisateurs.Columns.Add("Prénom", 120);
-            lvUtilisateurs.Columns.Add("Email", 180);
-            lvUtilisateurs.Columns.Add("Téléphone", 120);
-            lvUtilisateurs.Columns.Add("Type", 80);
+            lvUtilisateurs.Columns.Add("Email", 160);
+            lvUtilisateurs.Columns.Add("Téléphone", 110);
+            lvUtilisateurs.Columns.Add("Adresse", 160);
+            lvUtilisateurs.Columns.Add("Type", 90);
             lvUtilisateurs.Columns.Add("Mot de Passe", 120);
 
-            // Panel pour les boutons (en bas)
-            Panel panelBoutons = new Panel();
-            panelBoutons.Dock = DockStyle.Bottom;
-            panelBoutons.Height = 60;
-
-            // Panel pour le filtre (en haut)
-            Panel panelFiltre = new Panel();
-            panelFiltre.Dock = DockStyle.Top;
-            panelFiltre.Height = 40;
-            panelFiltre.Padding = new Padding(10);
-
-            // Filtre par type d'utilisateur
-            lblFiltre = new Label();
-            lblFiltre.Text = "Filtrer par:";
-            lblFiltre.AutoSize = true;
-            lblFiltre.Location = new Point(10, 10);
-
-            cbFiltre = new ComboBox();
-            cbFiltre.Items.AddRange(new object[] { "Tous", "Clients", "Cuisiniers" });
-            cbFiltre.SelectedIndex = 0;
-            cbFiltre.Location = new Point(lblFiltre.Right + 10, 7);
-            cbFiltre.Width = 150;
-            cbFiltre.DropDownStyle = ComboBoxStyle.DropDownList;
-            cbFiltre.SelectedIndexChanged += CbFiltre_SelectedIndexChanged;
-
-            // Boutons
-            btnFermer = new Button();
-            btnFermer.Text = "Fermer";
-            btnFermer.Size = new Size(100, 30);
-            btnFermer.Location = new Point(panelBoutons.Width - 120, 15);
-            btnFermer.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
-            btnFermer.Click += (s, e) => this.Close();
-
-            btnSupprimer = new Button();
-            btnSupprimer.Text = "Supprimer";
-            btnSupprimer.Size = new Size(100, 30);
-            btnSupprimer.Location = new Point(btnFermer.Left - 120, 15);
-            btnSupprimer.Anchor = AnchorStyles.Right | AnchorStyles.Bottom;
-            btnSupprimer.Click += BtnSupprimer_Click;
-
-            // Ajout des contrôles aux panels
-            panelFiltre.Controls.Add(lblFiltre);
-            panelFiltre.Controls.Add(cbFiltre);
-
-            panelBoutons.Controls.Add(btnFermer);
-            panelBoutons.Controls.Add(btnSupprimer);
-            // Ajout des panels à la form
+            lvUtilisateurs.SelectedIndexChanged += LvUtilisateurs_SelectedIndexChanged;
             this.Controls.Add(lvUtilisateurs);
-            this.Controls.Add(panelBoutons);
-            this.Controls.Add(panelFiltre);
+
+            // ✍️ Édition - Labels + TextBoxes
+            int labelWidth = 100, tbWidth = 200, lineHeight = 35, startY = 450, spacingY = 40, startX1 = 50, startX2 = 400;
+
+            txtNom = CreateField("Nom:", startX1, startY, labelWidth, tbWidth);
+            txtPrenom = CreateField("Prénom:", startX1, startY + spacingY, labelWidth, tbWidth);
+            txtEmail = CreateField("Email:", startX1, startY + 2 * spacingY, labelWidth, tbWidth);
+            txtTel = CreateField("Téléphone:", startX2, startY, labelWidth, tbWidth);
+            txtAdresse = CreateField("Adresse:", startX2, startY + spacingY, labelWidth, tbWidth);
+            txtMdp = CreateField("Mot de Passe:", startX2, startY + 2 * spacingY, labelWidth, tbWidth);
+
+            // ✅ Bouton Enregistrer
+            btnEnregistrer = new Button
+            {
+                Text = "Enregistrer",
+                Size = new Size(160, 45),
+                Location = new Point(750, startY + spacingY),
+                BackColor = Color.DarkSlateBlue,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 11, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnEnregistrer.Click += BtnEnregistrer_Click;
+            this.Controls.Add(btnEnregistrer);
+
+            // 🚪 Bouton Fermer
+            btnFermer = new Button
+            {
+                Text = "Fermer",
+                Size = new Size(120, 40),
+                Location = new Point(820, 620),
+                BackColor = Color.IndianRed,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10),
+                Cursor = Cursors.Hand
+            };
+            btnFermer.Click += (s, e) => this.Close();
+            this.Controls.Add(btnFermer);
+
+            // 🗑️ Bouton Supprimer
+            btnSupprimer = new Button
+            {
+                Text = "Supprimer",
+                Size = new Size(120, 40),
+                Location = new Point(680, 620),
+                BackColor = Color.DarkSlateBlue,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10),
+                Cursor = Cursors.Hand
+            };
+            btnSupprimer.Click += BtnSupprimer_Click;
+            this.Controls.Add(btnSupprimer);
+        }
+
+        private TextBox CreateField(string labelText, int x, int y, int labelWidth, int tbWidth)
+        {
+            Label lbl = new Label
+            {
+                Text = labelText,
+                Location = new Point(x, y + 5),
+                Width = labelWidth,
+                ForeColor = Color.White
+            };
+            TextBox tb = new TextBox
+            {
+                Location = new Point(x + labelWidth + 5, y),
+                Width = tbWidth
+            };
+            this.Controls.Add(lbl);
+            this.Controls.Add(tb);
+            return tb;
         }
 
         private void ChargerUtilisateurs(string filtre = "Tous")
@@ -99,20 +155,12 @@ namespace ProjetLivInParis
                 var db = new InterfaceBDD();
                 db.Connexion();
 
-                List<Utilisateur> utilisateurs;
-
-                switch (filtre)
+                List<Utilisateur> utilisateurs = filtre switch
                 {
-                    case "Clients":
-                        utilisateurs = db.RecupererClients().Cast<Utilisateur>().ToList();
-                        break;
-                    case "Cuisiniers":
-                        utilisateurs = db.RecupererCuisiniers().Cast<Utilisateur>().ToList();
-                        break;
-                    default:
-                        utilisateurs = db.RecupererUtilisateurs();
-                        break;
-                }
+                    "Clients" => db.RecupererClients().Cast<Utilisateur>().ToList(),
+                    "Cuisiniers" => db.RecupererCuisiniers().Cast<Utilisateur>().ToList(),
+                    _ => db.RecupererUtilisateurs()
+                };
 
                 lvUtilisateurs.Items.Clear();
 
@@ -123,24 +171,8 @@ namespace ProjetLivInParis
                     item.SubItems.Add(user.Prenom);
                     item.SubItems.Add(user.Email);
                     item.SubItems.Add(user.Telephone);
-
-                    string type = "N/A";
-                    string details = "";
-
-                    if (user is Client client)
-                    {
-                        type = "Client";
-                        details = client.TypeClient;
-                        if (client.TypeClient == "Entreprise")
-                        {
-                            details += $" - {client.NomEntreprise}";
-                        }
-                    }
-                    else if (user is Cuisinier)
-                    {
-                        type = "Cuisinier";
-                    }
-
+                    item.SubItems.Add(user.Adresse);  // 🆕 Adresse affichée
+                    string type = user is Client ? "Client" : user is Cuisinier ? "Cuisinier" : "N/A";
                     item.SubItems.Add(type);
                     item.SubItems.Add(user.MotDePasse);
 
@@ -161,9 +193,30 @@ namespace ProjetLivInParis
             ChargerUtilisateurs(cbFiltre.SelectedItem.ToString());
         }
 
+        private void LvUtilisateurs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lvUtilisateurs.SelectedItems.Count == 0)
+            {
+                txtNom.Text = "";
+                txtPrenom.Text = "";
+                txtEmail.Text = "";
+                txtTel.Text = "";
+                txtAdresse.Text = "";
+                txtMdp.Text = "";
+                return;
+            }
+
+            var item = lvUtilisateurs.SelectedItems[0];
+            txtNom.Text = item.SubItems[1].Text;
+            txtPrenom.Text = item.SubItems[2].Text;
+            txtEmail.Text = item.SubItems[3].Text;
+            txtTel.Text = item.SubItems[4].Text;
+            txtAdresse.Text = item.SubItems[5].Text;
+            txtMdp.Text = item.SubItems[7].Text;
+        }
+
         private void BtnSupprimer_Click(object sender, EventArgs e)
         {
-            // Vérifier si un utilisateur est sélectionné
             if (lvUtilisateurs.SelectedItems.Count == 0)
             {
                 MessageBox.Show("Veuillez sélectionner un utilisateur à supprimer.",
@@ -171,13 +224,10 @@ namespace ProjetLivInParis
                 return;
             }
 
-            // Récupérer l'ID et le nom de l'utilisateur sélectionné
             int idUtilisateur = int.Parse(lvUtilisateurs.SelectedItems[0].SubItems[0].Text);
             string nomUtilisateur = lvUtilisateurs.SelectedItems[0].SubItems[1].Text + " " +
-                                   lvUtilisateurs.SelectedItems[0].SubItems[2].Text;
-            string typeUtilisateur = lvUtilisateurs.SelectedItems[0].SubItems[5].Text;
+                                    lvUtilisateurs.SelectedItems[0].SubItems[2].Text;
 
-            // Demander confirmation avant de supprimer
             DialogResult result = MessageBox.Show(
                 $"Êtes-vous sûr de vouloir supprimer l'utilisateur {nomUtilisateur} ?",
                 "Confirmation de suppression",
@@ -190,30 +240,70 @@ namespace ProjetLivInParis
                 {
                     var db = new InterfaceBDD();
                     db.Connexion();
-
-                    // Supprimer l'utilisateur de la base de données
-                    bool suppressionReussie = db.SupprimerUtilisateur(idUtilisateur);
+                    bool success = db.SupprimerUtilisateur(idUtilisateur);
                     db.FermerConnexion();
 
-                    if (suppressionReussie)
+                    if (success)
                     {
                         MessageBox.Show($"L'utilisateur {nomUtilisateur} a été supprimé avec succès.",
-                            "Suppression réussie", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        // Rafraîchir la liste des utilisateurs
+                            "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         ChargerUtilisateurs(cbFiltre.SelectedItem.ToString());
                     }
                     else
                     {
-                        MessageBox.Show("La suppression a échoué.",
-                            "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("La suppression a échoué.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Erreur lors de la suppression de l'utilisateur: " + ex.Message,
+                    MessageBox.Show("Erreur lors de la suppression: " + ex.Message,
                         "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+        }
+
+        private void BtnEnregistrer_Click(object sender, EventArgs e)
+        {
+            if (lvUtilisateurs.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Veuillez sélectionner un utilisateur à modifier.",
+                    "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            int idUtilisateur = int.Parse(lvUtilisateurs.SelectedItems[0].SubItems[0].Text);
+
+            var utilisateur = new Utilisateur
+            {
+                ID = idUtilisateur,
+                Nom = txtNom.Text,
+                Prenom = txtPrenom.Text,
+                Email = txtEmail.Text,
+                Telephone = txtTel.Text,
+                Adresse = txtAdresse.Text,
+                MotDePasse = txtMdp.Text
+            };
+
+            try
+            {
+                var db = new InterfaceBDD();
+                db.Connexion();
+                bool success = db.MettreAJourUtilisateur(utilisateur);
+                db.FermerConnexion();
+
+                if (success)
+                {
+                    MessageBox.Show("Utilisateur modifié avec succès !");
+                    ChargerUtilisateurs(cbFiltre.SelectedItem.ToString());
+                }
+                else
+                {
+                    MessageBox.Show("Erreur lors de la mise à jour.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur lors de la mise à jour: " + ex.Message);
             }
         }
     }

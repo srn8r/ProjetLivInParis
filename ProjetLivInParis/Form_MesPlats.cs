@@ -1,0 +1,96 @@
+﻿using System;
+using System.Data;
+using System.Drawing;
+using System.Windows.Forms;
+using MySql.Data.MySqlClient;
+
+namespace ProjetLivInParis
+{
+    public partial class Form_MesPlats : Form
+    {
+        private int cuisinierId;
+        private ListView lvPlats;
+
+        public Form_MesPlats(int id)
+        {
+            cuisinierId = id;
+            this.Text = "Mes Plats";
+            this.Size = new Size(800, 550);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.BackColor = Color.MediumPurple;
+
+            Label lblTitre = new Label
+            {
+                Text = "Mes plats existants",
+                Font = new Font("Segoe UI", 16, FontStyle.Bold),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(20, 20)
+            };
+            this.Controls.Add(lblTitre);
+
+            lvPlats = new ListView
+            {
+                Location = new Point(20, 60),
+                Width = 740,
+                Height = 360,
+                View = View.Details,
+                FullRowSelect = true,
+                GridLines = true
+            };
+
+            lvPlats.Columns.Add("Nom", 150);
+            lvPlats.Columns.Add("Quantité", 80);
+            lvPlats.Columns.Add("Prix (€)", 80);
+            lvPlats.Columns.Add("Régime", 100);
+            lvPlats.Columns.Add("Péremption", 120);
+
+            this.Controls.Add(lvPlats);
+
+            Button btnFermer = new Button
+            {
+                Text = "Fermer",
+                Size = new Size(100, 40),
+                Location = new Point(660, 430),
+                BackColor = Color.IndianRed,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10)
+            };
+            btnFermer.Click += (s, e) => this.Close();
+            this.Controls.Add(btnFermer);
+
+            ChargerPlats();
+        }
+
+        private void ChargerPlats()
+        {
+            lvPlats.Items.Clear();
+            string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = @"SELECT PlatID, Nom, Quantite, Prix, Regime, Date_de_peremption, CommandeID 
+                                 FROM Plat WHERE CuisinierID = @CuisinierID";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@CuisinierID", cuisinierId);
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            ListViewItem item = new ListViewItem(reader["Nom"].ToString());
+                            item.SubItems.Add(reader["Quantite"].ToString());
+                            item.SubItems.Add(reader["Prix"].ToString());
+                            item.SubItems.Add(reader["Regime"].ToString());
+                            item.SubItems.Add(Convert.ToDateTime(reader["Date_de_peremption"]).ToShortDateString());
+
+                            lvPlats.Items.Add(item);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
