@@ -5,14 +5,15 @@ namespace ProjetLivInParis
 {
     public partial class Form_AfficherUtilisateurs : Form
     {
+        #region propriétés
         private ListView lvUtilisateurs;
         private ComboBox cbFiltre;
         private Button btnFermer, btnSupprimer, btnEnregistrer;
         private Label lblTitre;
-
-        // Champs d'édition
         private TextBox txtNom, txtPrenom, txtEmail, txtTel, txtMdp, txtAdresse;
+        #endregion
 
+        #region constructeur
         public Form_AfficherUtilisateurs()
         {
             InitializeComponent();
@@ -25,10 +26,11 @@ namespace ProjetLivInParis
             InitialiserComposants();
             ChargerUtilisateurs();
         }
+        #endregion
 
+        #region suite constructeur (structure)
         private void InitialiserComposants()
         {
-            // 🔥 Titre
             lblTitre = new Label
             {
                 Text = "Gestion des Utilisateurs",
@@ -39,7 +41,6 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(lblTitre);
 
-            // 🔎 ComboBox Filtre
             cbFiltre = new ComboBox
             {
                 Items = { "Tous", "Clients", "Cuisiniers" },
@@ -52,7 +53,6 @@ namespace ProjetLivInParis
             cbFiltre.SelectedIndexChanged += CbFiltre_SelectedIndexChanged;
             this.Controls.Add(cbFiltre);
 
-            // 🗒️ ListView
             lvUtilisateurs = new ListView
             {
                 Location = new Point(25, 110),
@@ -76,7 +76,6 @@ namespace ProjetLivInParis
             lvUtilisateurs.SelectedIndexChanged += LvUtilisateurs_SelectedIndexChanged;
             this.Controls.Add(lvUtilisateurs);
 
-            // ✍️ Édition - Labels + TextBoxes
             int labelWidth = 100, tbWidth = 200, lineHeight = 35, startY = 450, spacingY = 40, startX1 = 50, startX2 = 400;
 
             txtNom = CreateField("Nom:", startX1, startY, labelWidth, tbWidth);
@@ -86,7 +85,6 @@ namespace ProjetLivInParis
             txtAdresse = CreateField("Adresse:", startX2, startY + spacingY, labelWidth, tbWidth);
             txtMdp = CreateField("Mot de Passe:", startX2, startY + 2 * spacingY, labelWidth, tbWidth);
 
-            // ✅ Bouton Enregistrer
             btnEnregistrer = new Button
             {
                 Text = "Enregistrer",
@@ -100,7 +98,6 @@ namespace ProjetLivInParis
             btnEnregistrer.Click += BtnEnregistrer_Click;
             this.Controls.Add(btnEnregistrer);
 
-            // 🚪 Bouton Fermer
             btnFermer = new Button
             {
                 Text = "Fermer",
@@ -114,7 +111,6 @@ namespace ProjetLivInParis
             btnFermer.Click += (s, e) => this.Close();
             this.Controls.Add(btnFermer);
 
-            // 🗑️ Bouton Supprimer
             btnSupprimer = new Button
             {
                 Text = "Supprimer",
@@ -128,7 +124,6 @@ namespace ProjetLivInParis
             btnSupprimer.Click += BtnSupprimer_Click;
             this.Controls.Add(btnSupprimer);
         }
-
         private TextBox CreateField(string labelText, int x, int y, int labelWidth, int tbWidth)
         {
             Label lbl = new Label
@@ -147,7 +142,9 @@ namespace ProjetLivInParis
             this.Controls.Add(tb);
             return tb;
         }
+        #endregion
 
+        #region méthodes
         private void ChargerUtilisateurs(string filtre = "Tous")
         {
             try
@@ -171,7 +168,7 @@ namespace ProjetLivInParis
                     item.SubItems.Add(user.Prenom);
                     item.SubItems.Add(user.Email);
                     item.SubItems.Add(user.Telephone);
-                    item.SubItems.Add(user.Adresse);  // 🆕 Adresse affichée
+                    item.SubItems.Add(user.Adresse);  
                     string type = user is Client ? "Client" : user is Cuisinier ? "Cuisinier" : "N/A";
                     item.SubItems.Add(type);
                     item.SubItems.Add(user.MotDePasse);
@@ -306,5 +303,6 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors de la mise à jour: " + ex.Message);
             }
         }
+        #endregion
     }
 }

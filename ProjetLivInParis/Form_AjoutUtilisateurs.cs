@@ -7,6 +7,7 @@ namespace ProjetLivInParis
 {
     public partial class Form_AjoutUtilisateurs : Form
     {
+        #region propriétés
         private TextBox txtNom, txtPrenom, txtTelephone, txtEmail, txtMotDePasse;
         private ComboBox cbAdresse;
         private RadioButton rbClient, rbCuisinier, rbClientEtCuisinier;
@@ -14,7 +15,9 @@ namespace ProjetLivInParis
         private TextBox txtNomEntreprise, txtReferent;
         private Button btnAjouter;
         private StationManager stationManager;
+        #endregion
 
+        #region constructeur
         public Form_AjoutUtilisateurs()
         {
             InitializeComponent();
@@ -28,7 +31,9 @@ namespace ProjetLivInParis
 
             InitialiserComposants();
         }
+        #endregion
 
+        #region suite constructeur (structure)
         private void InitialiserComposants()
         {
             int labelWidth = 100;
@@ -139,6 +144,9 @@ namespace ProjetLivInParis
             RbClient_CheckedChanged(null, null);
 
         }
+        #endregion
+
+        #region méthodes
         private void ChargerStationsMetro()
         {
             // Récupérer toutes les stations uniques du graphe
@@ -277,5 +285,6 @@ namespace ProjetLivInParis
 
             return true;
         }
+        #endregion
     }
 }

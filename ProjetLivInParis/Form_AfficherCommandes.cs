@@ -10,11 +10,14 @@ namespace ProjetLivInParis
 {
     public partial class Form_AfficherCommandes : Form
     {
+        #region propriétés
         private ListView lvCommandes;
         private Button btnFermer;
         private Button btnSupprimer;
         private Label lblTitre;
+        #endregion
 
+        #region constructeur
         public Form_AfficherCommandes()
         {
             InitializeComponent();
@@ -26,7 +29,9 @@ namespace ProjetLivInParis
             InitialiserComposants();
             ChargerCommandes();
         }
+        #endregion
 
+        #region suite constructeur (structure)
         private void InitialiserComposants()
         {
             // Titre
@@ -87,7 +92,9 @@ namespace ProjetLivInParis
             btnFermer.Click += (s, e) => this.Close();
             this.Controls.Add(btnFermer);
         }
+        #endregion
 
+        #region méthodes
         private void ChargerCommandes()
         {
             try
@@ -167,5 +174,6 @@ namespace ProjetLivInParis
                 }
             }
         }
+        #endregion
     }
 }
