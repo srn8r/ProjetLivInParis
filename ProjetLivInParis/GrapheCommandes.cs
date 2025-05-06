@@ -20,43 +20,45 @@ namespace ProjetLivInParis
             {
                 conn.Open();
 
-                // 1️⃣ Charger Clients
-                string queryClients = "SELECT ID, Nom FROM Identite WHERE ID IN (SELECT ID FROM Client)";
-                using (var cmd = new MySqlCommand(queryClients, conn))
+                string queryIdentites = @"
+                    SELECT i.ID, i.Nom, 
+                           CASE WHEN cl.ID IS NOT NULL THEN 1 ELSE 0 END AS EstClient,
+                           CASE WHEN cu.ID IS NOT NULL THEN 1 ELSE 0 END AS EstCuisinier
+                    FROM Identite i
+                    LEFT JOIN Client cl ON i.ID = cl.ID
+                    LEFT JOIN Cuisinier cu ON i.ID = cu.ID
+                    WHERE cl.ID IS NOT NULL OR cu.ID IS NOT NULL";
+
+                using (var cmd = new MySqlCommand(queryIdentites, conn))
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
+                        int id = reader.GetInt32("ID");
+                        string nom = reader.GetString("Nom");
+                        bool estClient = reader.GetBoolean("EstClient");
+                        bool estCuisinier = reader.GetBoolean("EstCuisinier");
+
+                        string type;
+                        if (estClient && estCuisinier)
+                            type = "Client-Cuisinier";
+                        else if (estClient)
+                            type = "Client";
+                        else
+                            type = "Cuisinier";
+
                         var sommet = new Sommet
                         {
-                            Id = reader.GetInt32("ID"),
-                            Nom = reader.GetString("Nom"),
-                            Type = "Client"
+                            Id = id,
+                            Nom = nom,
+                            Type = type
                         };
+
                         Sommets.Add(sommet);
-                        sommetsDict[sommet.Id] = sommet;
+                        sommetsDict[id] = sommet;
                     }
                 }
 
-                // 2️⃣ Charger Cuisiniers
-                string queryCuisiniers = "SELECT ID, Nom FROM Identite WHERE ID IN (SELECT ID FROM Cuisinier)";
-                using (var cmd = new MySqlCommand(queryCuisiniers, conn))
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var sommet = new Sommet
-                        {
-                            Id = reader.GetInt32("ID"),
-                            Nom = reader.GetString("Nom"),
-                            Type = "Cuisinier"
-                        };
-                        Sommets.Add(sommet);
-                        sommetsDict[sommet.Id] = sommet;
-                    }
-                }
-
-                // 3️⃣ Charger les commandes (création des arêtes)
                 string queryCommandes = "SELECT ClientID, CuisinierID FROM Commande JOIN Plat ON Commande.CommandeID = Plat.CommandeID";
                 using (var cmd = new MySqlCommand(queryCommandes, conn))
                 using (var reader = cmd.ExecuteReader())
@@ -68,12 +70,19 @@ namespace ProjetLivInParis
 
                         if (sommetsDict.ContainsKey(clientId) && sommetsDict.ContainsKey(cuisinierId))
                         {
-                            var arete = new Arete
+                            bool areteExiste = Aretes.Any(a =>
+                                (a.Source.Id == clientId && a.Cible.Id == cuisinierId) ||
+                                (a.Source.Id == cuisinierId && a.Cible.Id == clientId));
+
+                            if (!areteExiste && clientId != cuisinierId) 
                             {
-                                Source = sommetsDict[clientId],
-                                Cible = sommetsDict[cuisinierId]
-                            };
-                            Aretes.Add(arete);
+                                var arete = new Arete
+                                {
+                                    Source = sommetsDict[clientId],
+                                    Cible = sommetsDict[cuisinierId]
+                                };
+                                Aretes.Add(arete);
+                            }
                         }
                     }
                 }
@@ -82,14 +91,12 @@ namespace ProjetLivInParis
 
         public void AppliquerColorationWelshPowell()
         {
-            // Calculer le degré de chaque sommet
             var degres = new Dictionary<Sommet, int>();
             foreach (var sommet in Sommets)
             {
                 degres[sommet] = Aretes.Count(a => a.Source == sommet || a.Cible == sommet);
             }
 
-            // Trier les sommets par degré décroissant
             var sommetsTries = Sommets.OrderByDescending(s => degres[s]).ToList();
 
             int couleurActuelle = 1;
@@ -97,7 +104,6 @@ namespace ProjetLivInParis
             {
                 foreach (var sommet in sommetsTries.Where(s => s.Couleur == -1))
                 {
-                    // Vérifier les couleurs des voisins
                     var voisins = ObtenirVoisins(sommet);
                     bool conflit = voisins.Any(v => v.Couleur == couleurActuelle);
 
@@ -128,8 +134,8 @@ namespace ProjetLivInParis
     {
         public int Id { get; set; }
         public string Nom { get; set; }
-        public string Type { get; set; } // "Client" ou "Cuisinier"
-        public int Couleur { get; set; } = -1; // Non colorié par défaut
+        public string Type { get; set; }
+        public int Couleur { get; set; } = -1;
     }
 
     public class Arete

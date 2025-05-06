@@ -14,6 +14,7 @@ namespace ProjetLivInParis
         private ListView lvCommandes;
         private Button btnFermer;
         private Button btnSupprimer;
+        private Button btnEffacerTout;
         private Label lblTitre;
         #endregion
 
@@ -79,6 +80,19 @@ namespace ProjetLivInParis
             };
             btnSupprimer.Click += BtnSupprimer_Click;
             this.Controls.Add(btnSupprimer);
+
+            // Bouton Effacer Tout
+            btnEffacerTout = new Button
+            {
+                Text = "Effacer Tout",
+                Size = new Size(250, 40),
+                Location = new Point(240, 480),
+                BackColor = Color.DarkRed,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+            };
+            btnEffacerTout.Click += BtnEffacerTout_Click;
+            this.Controls.Add(btnEffacerTout);
 
             // Bouton Fermer
             btnFermer = new Button
@@ -174,6 +188,61 @@ namespace ProjetLivInParis
                 {
                     MessageBox.Show("Erreur lors de la suppression : " + ex.Message,
                         "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+        private void BtnEffacerTout_Click(object sender, EventArgs e)
+        {
+            if (lvCommandes.Items.Count == 0)
+            {
+                MessageBox.Show("Il n'y a aucune commande à effacer.",
+                    "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            DialogResult result = MessageBox.Show(
+                "ATTENTION : Cette action va supprimer TOUTES les commandes de la base de données.\n\n" +
+                "Cette opération est irréversible. Voulez-vous vraiment continuer ?",
+                "⚠️ Confirmation de suppression massive",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
+            {
+                // Double confirmation pour éviter les erreurs
+                DialogResult secondConfirmation = MessageBox.Show(
+                    "Dernière chance : Confirmez-vous la suppression de TOUTES les commandes ?",
+                    "⚠️ Confirmation finale",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (secondConfirmation == DialogResult.Yes)
+                {
+                    try
+                    {
+                        var db = new InterfaceBDD();
+                        db.Connexion();
+
+                        bool success = db.SupprimerToutesLesCommandes();
+
+                        db.FermerConnexion();
+
+                        if (success)
+                        {
+                            MessageBox.Show("Toutes les commandes ont été supprimées.",
+                                "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            ChargerCommandes(); 
+                        }
+                        else
+                        {
+                            MessageBox.Show("La suppression a échoué.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Erreur lors de la suppression : " + ex.Message,
+                            "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }
