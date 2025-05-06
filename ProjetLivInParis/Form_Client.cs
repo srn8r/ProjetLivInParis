@@ -397,55 +397,7 @@ namespace ProjetLivInParis
             bool adresseOk = false;
             string clientAdresseActuelle = infos.ClientAdresse; // Adresse initiale (dans infos)
 
-            while (!adresseOk)
-            {
-                var graphe = stationManager.ObtenirGraphe();
-                adresseOk = graphe.Noeuds.Any(n => n.Valeur.Nom.Equals(clientAdresseActuelle, StringComparison.OrdinalIgnoreCase));
-
-                if (!adresseOk)
-                {
-                    // Demander au client de choisir une station valide
-                    List<string> toutesStations = graphe.Noeuds.Select(n => n.Valeur.Nom).OrderBy(n => n).ToList();
-                    using (var formChoix = new Form_ChoisirStation(toutesStations))
-                    {
-                        var result = formChoix.ShowDialog();
-                        if (result == DialogResult.OK)
-                        {
-                            string stationChoisie = formChoix.StationChoisie;
-
-                            // ➔ Mettre à jour la table Identite
-                            try
-                            {
-                                using (MySqlConnection conn = new MySqlConnection(connectionString))
-                                {
-                                    conn.Open();
-                                    string update = "UPDATE Identite SET Adresse = @Station WHERE ID = @ClientID";
-                                    using (MySqlCommand cmdMaj = new MySqlCommand(update, conn))
-                                    {
-                                        cmdMaj.Parameters.AddWithValue("@Station", stationChoisie);
-                                        cmdMaj.Parameters.AddWithValue("@ClientID", userId);
-                                        cmdMaj.ExecuteNonQuery();
-                                    }
-                                }
-                                MessageBox.Show($"Votre station a été mise à jour : {stationChoisie}", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                // Mettre à jour localement aussi
-                                clientAdresseActuelle = stationChoisie;
-                                infos.ClientAdresse = stationChoisie;
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show("Erreur lors de la mise à jour de votre station : " + ex.Message);
-                                return; // stoppe si erreur critique
-                            }
-                        }
-                        else
-                        {
-                            // L'utilisateur a annulé -> on stoppe la commande
-                            return;
-                        }
-                    }
-                }
-            }
+            var graphe = stationManager.ObtenirGraphe();
 
             // 👌 Maintenant on est sûr que l'adresse est bonne ➔ passer la commande
             try
