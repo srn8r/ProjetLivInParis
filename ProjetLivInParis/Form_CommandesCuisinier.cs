@@ -121,7 +121,7 @@ namespace ProjetLivInParis
 
             var selected = lvCommandes.SelectedItems[0];
             int commandeId = int.Parse(selected.SubItems[0].Text);
-            string statutActuel = selected.SubItems[6].Text;
+            string statutActuel = selected.SubItems[5].Text;
 
             string nouveauStatut = Prompt.ShowDialog("Modifier le statut :", "Changer Statut", statutActuel);
             if (string.IsNullOrWhiteSpace(nouveauStatut)) return;
@@ -151,7 +151,7 @@ namespace ProjetLivInParis
         {
             Form prompt = new Form
             {
-                Width = 300,
+                Width = 400,
                 Height = 180,
                 Text = caption,
                 StartPosition = FormStartPosition.CenterScreen
