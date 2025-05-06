@@ -6,12 +6,12 @@ using MySql.Data.MySqlClient;
 
 namespace ProjetLivInParis
 {
-    public partial class Form_MesPlats : Form
+    public partial class Form_PlatsCuisinier : Form
     {
         private int cuisinierId;
         private ListView lvPlats;
 
-        public Form_MesPlats(int id)
+        public Form_PlatsCuisinier(int id)
         {
             cuisinierId = id;
             this.Text = "Mes Plats";

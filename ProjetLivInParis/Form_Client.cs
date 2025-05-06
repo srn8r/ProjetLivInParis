@@ -329,7 +329,7 @@ namespace ProjetLivInParis
 
         private void BtnVoirCommandes_Click(object sender, EventArgs e)
         {
-            Form_MesCommandes formCmd = new Form_MesCommandes(userId);
+            Form_CommandesClient formCmd = new Form_CommandesClient(userId);
             formCmd.ShowDialog();
         }
 

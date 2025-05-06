@@ -1,6 +1,6 @@
 ﻿namespace ProjetLivInParis
 {
-    partial class Form_MesCommandes
+    partial class Form_PlatsCuisinier
     {
         /// <summary>
         /// Required designer variable.
@@ -31,7 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form_MesCommandes";
+            this.Text = "Form_MesPlats";
         }
 
         #endregion

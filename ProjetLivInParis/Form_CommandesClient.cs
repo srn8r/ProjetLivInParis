@@ -9,7 +9,7 @@ using Project_LivInParis;
 
 namespace ProjetLivInParis
 {
-    public partial class Form_MesCommandes : Form
+    public partial class Form_CommandesClient : Form
     {
         private int userId;
         private ListView listCommandes;
@@ -19,7 +19,7 @@ namespace ProjetLivInParis
         private ContextMenuStrip contextMenu;
         private string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
 
-        public Form_MesCommandes(int userId)
+        public Form_CommandesClient(int userId)
         {
             InitializeComponent();
             this.userId = userId;
