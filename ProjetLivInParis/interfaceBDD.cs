@@ -327,6 +327,44 @@ namespace Project_LivInParis
                 return false;
             }
         }
+        public bool SupprimerToutesLesCommandes()
+        {
+            try
+            {
+                // D'abord supprimer tous les plats liés aux commandes
+                string deletePlatsQuery = "DELETE FROM Plat";
+                using (MySqlCommand cmdPlats = new MySqlCommand(deletePlatsQuery, connexion))
+                {
+                    cmdPlats.ExecuteNonQuery();
+                }
+
+                // Ensuite supprimer toutes les commandes
+                string deleteCommandeQuery = "DELETE FROM Commande";
+                using (MySqlCommand cmdCmd = new MySqlCommand(deleteCommandeQuery, connexion))
+                {
+                    cmdCmd.ExecuteNonQuery();
+                }
+
+                // Réinitialiser les auto-increments
+                string resetCommandeAutoIncrement = "ALTER TABLE Commande AUTO_INCREMENT = 1";
+                using (MySqlCommand cmdResetCmd = new MySqlCommand(resetCommandeAutoIncrement, connexion))
+                {
+                    cmdResetCmd.ExecuteNonQuery();
+                }
+
+                string resetPlatAutoIncrement = "ALTER TABLE Plat AUTO_INCREMENT = 1";
+                using (MySqlCommand cmdResetPlat = new MySqlCommand(resetPlatAutoIncrement, connexion))
+                {
+                    cmdResetPlat.ExecuteNonQuery();
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         #endregion
 
         #endregion
