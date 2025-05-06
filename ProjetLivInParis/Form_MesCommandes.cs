@@ -25,7 +25,7 @@ namespace ProjetLivInParis
             this.userId = userId;
 
             this.Text = "Mes Commandes";
-            this.Size = new Size(800, 500);
+            this.Size = new Size(940, 500);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.Beige;
 
@@ -45,7 +45,7 @@ namespace ProjetLivInParis
 
             listCommandes = new ListView
             {
-                Width = 720,
+                Width = 840,
                 Height = 300,
                 Top = 70,
                 Left = 30,
@@ -59,6 +59,7 @@ namespace ProjetLivInParis
             listCommandes.Columns.Add("Prix (€)", 100);
             listCommandes.Columns.Add("Adresse Livraison", 200);
             listCommandes.Columns.Add("Date", 120);
+            listCommandes.Columns.Add("Statut", 120);
 
             contextMenu = new ContextMenuStrip();
             contextMenu.Items.Add("Supprimer la commande", null, (s, ev) => SupprimerCommande());
@@ -92,7 +93,7 @@ namespace ProjetLivInParis
                 {
                     conn.Open();
                     string query = @"
-                        SELECT c.CommandeID, p.Nom, p.Prix, c.AdresseLivraison, c.DateCommande
+                        SELECT c.CommandeID, p.Nom, p.Prix, c.AdresseLivraison, c.DateCommande, c.statut
                         FROM Commande c
                         JOIN Plat p ON c.CommandeID = p.CommandeID
                         WHERE c.ClientID = @ClientID";
@@ -109,12 +110,14 @@ namespace ProjetLivInParis
                                 decimal prix = reader.GetDecimal("Prix");
                                 string adresse = reader.GetString("AdresseLivraison");
                                 string date = reader.GetDateTime("DateCommande").ToString("dd/MM/yyyy");
+                                string statut = reader.GetString("Statut");
 
                                 var item = new ListViewItem(idCommande);
                                 item.SubItems.Add(nomPlat);
                                 item.SubItems.Add(prix.ToString("0.00"));
                                 item.SubItems.Add(adresse);
                                 item.SubItems.Add(date);
+                                item.SubItems.Add(statut);
 
                                 listCommandes.Items.Add(item);
                                 total += prix;
@@ -207,11 +210,11 @@ namespace ProjetLivInParis
                 {
                     conn.Open();
                     string query = @"
-                        SELECT u.Adresse
-                        FROM Plat p
-                        JOIN Identite u ON p.CuisinierID = u.ID
-                        WHERE p.Nom = @Nom AND p.CommandeID IS NOT NULL
-                        LIMIT 1";
+                SELECT u.Adresse
+                FROM Plat p
+                JOIN Identite u ON p.CuisinierID = u.ID
+                WHERE p.Nom = @Nom AND p.CommandeID IS NOT NULL
+                LIMIT 1";
 
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
@@ -250,17 +253,12 @@ namespace ProjetLivInParis
                     return;
                 }
 
-                // ✅ Afficher le trajet sous forme de MessageBox simple (pour le moment)
-                var trajet = new StringBuilder();
-                trajet.AppendLine($"Trajet : {adresseCuisinier} ➔ {adresseClient}\n");
-                for (int i = 0; i < chemin.Count; i++)
-                {
-                    trajet.Append(chemin[i].Valeur.Nom);
-                    if (i < chemin.Count - 1)
-                        trajet.Append(" ➔ ");
-                }
+                // Calculer le temps (tu peux affiner si besoin)
+                int tempsTrajet = chemin.Count * 2;
 
-                MessageBox.Show(trajet.ToString(), "Trajet", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Appel de la nouvelle Form_Trajet ✨
+                var formTrajet = new Form_Trajet(chemin, tempsTrajet, $"Trajet de {adresseCuisinier} ➔ {adresseClient}");
+                formTrajet.ShowDialog();
             }
             catch (Exception ex)
             {

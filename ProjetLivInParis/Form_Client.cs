@@ -16,13 +16,18 @@ namespace ProjetLivInParis
     public partial class Form_Client : Form
     {
         private int userId;
+        private string prenomClient;
+        
         private ListView listPlats;
         private Button btnCommander;
         private Button btnVoirDetails;
+        private Button btnVoirCommandes;
+        
         private StationManager stationManager;
         private Dictionary<string, int> tempsTrajets = new Dictionary<string, int>();
         private Dictionary<string, PlatInfo> informationsPlats = new Dictionary<string, PlatInfo>();
         private string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+        private Label lblBienvenue;
 
         private class PlatInfo
         {
@@ -42,7 +47,7 @@ namespace ProjetLivInParis
 
         public Form_Client(int id)
         {
-            InitializeComponent();
+            /*InitializeComponent();
             this.Text = "Espace Client";
             this.Size = new Size(750, 500);
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -51,74 +56,50 @@ namespace ProjetLivInParis
 
             stationManager = new StationManager(connectionString);
             stationManager.ChargerStationsDepuisBDD();
-            stationManager.LierCorrespondances();
+            stationManager.LierCorrespondances();*/
 
-            string clientAdresse = "";
+            
+            InitializeComponent();
+            userId = id;
 
-            try
-            {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
-                {
-                    conn.Open();
-                    string queryClient = "SELECT Adresse FROM Identite WHERE ID = @ClientID";
-                    using (MySqlCommand cmd = new MySqlCommand(queryClient, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@ClientID", userId);
-                        using (MySqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                clientAdresse = reader.GetString("Adresse");
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Erreur lors de la récupération des informations client : " + ex.Message);
-            }
+            this.Text = "Espace Client";
+            this.Size = new Size(800, 600);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.BackColor = Color.LightSteelBlue;
 
-            Label titre = new Label
+            lblBienvenue = new Label
             {
-                Text = "Liste des plats disponibles",
-                Font = new Font("Segoe UI", 14, FontStyle.Bold),
+                Font = new Font("Segoe UI", 16, FontStyle.Bold),
                 ForeColor = Color.DarkBlue,
-                AutoSize = true,
-                Location = new Point(40, 20)
+                Location = new Point(20, 20),
+                AutoSize = true
             };
-            this.Controls.Add(titre);
+            this.Controls.Add(lblBienvenue);
 
             listPlats = new ListView
             {
-                Width = 650,
-                Height = 300,
-                Top = 60,
-                Left = 40,
+                Width = 720,
+                Height = 320,
+                Top = 70,
+                Left = 30,
                 View = View.Details,
                 FullRowSelect = true,
-                GridLines = true,
-                MultiSelect = false
+                GridLines = true
             };
 
             listPlats.Columns.Add("Nom du plat", 200);
-            listPlats.Columns.Add("Quantite", 120);
-            listPlats.Columns.Add("Prix (€)", 80);
-            listPlats.Columns.Add("Régime", 100);
+            listPlats.Columns.Add("Quantité", 100);
+            listPlats.Columns.Add("Prix (€)", 100);
+            listPlats.Columns.Add("Régime", 150);
             listPlats.Columns.Add("Temps de livraison", 150);
-
-            listPlats.DoubleClick += ListPlats_DoubleClick;
-            listPlats.Click += ListPlats_Click;
-
-            ChargerPlats(clientAdresse);
 
             btnCommander = new Button
             {
                 Text = "Commander",
                 Width = 150,
                 Height = 40,
-                Top = 380,
-                Left = 40,
+                Top = 410,
+                Left = 30,
                 BackColor = Color.DarkGreen,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold)
@@ -130,90 +111,147 @@ namespace ProjetLivInParis
                 Text = "Voir détails",
                 Width = 150,
                 Height = 40,
-                Top = 380,
-                Left = 210,
+                Top = 410,
+                Left = 200,
                 BackColor = Color.RoyalBlue,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold)
             };
             btnVoirDetails.Click += BtnVoirDetails_Click;
 
+            btnVoirCommandes = new Button
+            {
+                Text = "Voir mes commandes",
+                Width = 200,
+                Height = 40,
+                Top = 410,
+                Left = 380,
+                BackColor = Color.SteelBlue,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+            };
+            btnVoirCommandes.Click += BtnVoirCommandes_Click;
+
             this.Controls.Add(listPlats);
             this.Controls.Add(btnCommander);
             this.Controls.Add(btnVoirDetails);
+            this.Controls.Add(btnVoirCommandes);
+
+            stationManager = new StationManager(connectionString);
+            stationManager.ChargerStationsDepuisBDD();
+            stationManager.LierCorrespondances();
+
+            ChargerInfosClient();
+            ChargerPlatsDisponibles();
         }
 
-        private void ChargerPlats(string clientAdresse)
+        private void ChargerInfosClient()
         {
-            try
+            using (var conn = new MySqlConnection(connectionString))
             {
-                listPlats.Items.Clear();
-                informationsPlats.Clear();
-
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                conn.Open();
+                string query = "SELECT Prenom FROM Identite WHERE ID = @ID";
+                using (var cmd = new MySqlCommand(query, conn))
                 {
-                    conn.Open();
-                    string query = @"
-            SELECT p.PlatID, p.Nom, p.Quantite, p.date_de_fabrication, p.Date_de_peremption, 
-                   p.Prix, p.Regime, p.CuisinierID, u.Adresse
-            FROM Plat p
-            JOIN Identite u ON p.CuisinierID = u.ID
-            WHERE p.Date_de_peremption >= CURDATE() AND p.CommandeID IS NULL AND p.Quantite > 0";
-
-                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    cmd.Parameters.AddWithValue("@ID", userId);
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        while (reader.Read())
+                        if (reader.Read())
                         {
-                            int platId = reader.GetInt32("PlatID");
-                            string nom = reader.GetString("Nom");
-                            int quantite = reader.GetInt32("Quantite");
-                            DateTime dateFabrication = reader.GetDateTime("date_de_fabrication");
-                            DateTime datePeremption = reader.GetDateTime("Date_de_peremption");
-                            decimal prix = reader.GetDecimal("Prix");
-                            string regime = reader.GetString("Regime");
-                            int cuisinierId = reader.GetInt32("CuisinierID");
-                            string cuisinierAdresse = reader.GetString("Adresse");
-
-                            // Calculer le temps de trajet entre les stations
-                            var (tempsTrajet, chemin) = CalculerTrajet(cuisinierAdresse, clientAdresse);
-
-                            // Stocker les informations complètes du plat
-                            PlatInfo platInfo = new PlatInfo
-                            {
-                                Id = platId,
-                                Nom = nom,
-                                Quantite = quantite,
-                                DateFabrication = dateFabrication,
-                                DatePeremption = datePeremption,
-                                Prix = prix,
-                                Regime = regime,
-                                CuisinierID = cuisinierId,
-                                CuisinierAdresse = cuisinierAdresse,
-                                ClientAdresse = clientAdresse,
-                                TempsTrajet = tempsTrajet,
-                                Chemin = chemin
-                            };
-
-                            informationsPlats[nom] = platInfo;
-
-                            // Ajouter le plat à la liste
-                            ListViewItem item = new ListViewItem(nom);
-                            item.SubItems.Add(quantite.ToString());
-                            item.SubItems.Add(prix.ToString("0.00"));
-                            item.SubItems.Add(regime);
-                            item.SubItems.Add(tempsTrajet + " minutes");
-
-                            listPlats.Items.Add(item);
+                            prenomClient = reader.GetString("Prenom");
                         }
                     }
                 }
             }
+            lblBienvenue.Text = $"Bienvenue {prenomClient}";
+        }
+
+        private void ChargerPlatsDisponibles()
+        {
+            informationsPlats.Clear();
+            listPlats.Items.Clear();
+
+            try
+            {
+                using (var conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = @"
+                SELECT p.PlatID, p.Nom, p.Quantite, p.date_de_fabrication, p.Date_de_peremption, 
+                       p.Prix, p.Regime, u.Adresse AS CuisinierAdresse, c.Adresse AS ClientAdresse
+                FROM Plat p
+                JOIN Identite u ON p.CuisinierID = u.ID
+                JOIN Identite c ON c.ID = @ClientID
+                WHERE p.Date_de_peremption >= CURDATE() AND p.Quantite > 0 AND p.CommandeID IS NULL;";
+
+                    using (var cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@ClientID", userId);
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                int id = reader.GetInt32("PlatID");
+                                string nom = reader.GetString("Nom");
+                                int quantite = reader.GetInt32("Quantite");
+                                DateTime dateFab = reader.GetDateTime("date_de_fabrication");
+                                DateTime datePeremp = reader.GetDateTime("Date_de_peremption");
+                                decimal prix = reader.GetDecimal("Prix");
+                                string regime = reader.GetString("Regime");
+                                string cuisAdresse = reader.GetString("CuisinierAdresse");
+                                string clientAdresse = reader.GetString("ClientAdresse");
+
+                                // Calculer le temps de trajet et le chemin
+                                var (tempsTrajet, chemin) = CalculerTrajet(cuisAdresse, clientAdresse);
+
+                                // Stocker dans le dictionnaire
+                                informationsPlats[nom] = new PlatInfo
+                                {
+                                    Id = id,
+                                    Nom = nom,
+                                    Quantite = quantite,
+                                    DateFabrication = dateFab,
+                                    DatePeremption = datePeremp,
+                                    Prix = prix,
+                                    Regime = regime,
+                                    CuisinierAdresse = cuisAdresse,
+                                    ClientAdresse = clientAdresse,
+                                    TempsTrajet = tempsTrajet,
+                                    Chemin = chemin
+                                };
+
+                                // Ajouter à la liste visuelle
+                                var item = new ListViewItem(nom);
+                                item.SubItems.Add(quantite.ToString());
+                                item.SubItems.Add(prix.ToString("0.00"));
+                                item.SubItems.Add(regime);
+                                item.SubItems.Add(tempsTrajet + " minutes");
+
+                                listPlats.Items.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                if (listPlats.Items.Count == 0)
+                {
+                    btnCommander.Enabled = false;
+                    btnVoirDetails.Enabled = false;
+                }
+                else
+                {
+                    btnCommander.Enabled = true;
+                    btnVoirDetails.Enabled = true;
+                }
+            }
             catch (Exception ex)
             {
-                MessageBox.Show("Erreur lors du chargement des plats : " + ex.Message);
+                MessageBox.Show("Erreur lors du chargement des plats : " + ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+
         private void AfficherDetailsPlat(string platNom)
         {
             if (informationsPlats.TryGetValue(platNom, out PlatInfo infos))
@@ -247,7 +285,6 @@ namespace ProjetLivInParis
                 }
 
                 AddDetailRow(layout, 0, "Nom:", infos.Nom);
-                //AddDetailRow(layout, 1, "Quantite:", infos.Quantite);
                 AddDetailRow(layout, 1, "Date de fabrication:", infos.DateFabrication.ToShortDateString());
                 AddDetailRow(layout, 2, "Date de péremption:", infos.DatePeremption.ToShortDateString());
                 AddDetailRow(layout, 3, "Prix:", infos.Prix.ToString("0.00") + " €");
@@ -290,6 +327,12 @@ namespace ProjetLivInParis
             }, 1, row);
         }
 
+        private void BtnVoirCommandes_Click(object sender, EventArgs e)
+        {
+            Form_MesCommandes formCmd = new Form_MesCommandes(userId);
+            formCmd.ShowDialog();
+        }
+
         private void AfficherTrajet(string platNom)
         {
             if (!informationsPlats.TryGetValue(platNom, out PlatInfo infos) || infos.Chemin == null || infos.Chemin.Count == 0)
@@ -299,181 +342,8 @@ namespace ProjetLivInParis
                 return;
             }
 
-            var segmentsParLigne = ExtraireTrajetParLigne(infos.Chemin);
-
-            Form formTrajet = new Form
-            {
-                Text = $"Trajet de livraison: {platNom}",
-                Size = new Size(800, Math.Max(400, 100 + segmentsParLigne.Count * 90)), // Ajustement dynamique de la hauteur
-                StartPosition = FormStartPosition.CenterParent,
-                AutoScroll = true // Activer le défilement si nécessaire
-            };
-
-            Panel panelTrajet = new Panel
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.White,
-                AutoScroll = true
-            };
-
-            Dictionary<string, Color> couleursParLigne = new Dictionary<string, Color>(){
-                { "1", Color.Gold },
-                { "2", Color.Blue },
-                { "3", Color.Brown },
-                { "3bis", Color.LightSkyBlue },
-                { "4", Color.Purple },
-                { "5", Color.Orange },
-                { "6", Color.LightGreen },
-                { "7", Color.Pink },
-                { "7bis", Color.LightPink },
-                { "8", Color.Gray },
-                { "9", Color.Olive },
-                { "10", Color.DarkGoldenrod },
-                { "11", Color.DarkOrange },
-                { "12", Color.SeaGreen },
-                { "13", Color.Teal },
-                { "14", Color.DarkViolet },
-            };
-
-            panelTrajet.Paint += (s, e) =>
-            {
-                Graphics g = e.Graphics;
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                Font stationFont = new Font("Segoe UI", 9);
-                Font numLigneFont = new Font("Segoe UI", 9, FontStyle.Bold);
-                Font titreFont = new Font("Segoe UI", 12, FontStyle.Bold);
-
-                int paddingLateral = 80; 
-                int hauteurSegment = 90;
-                int largeurTotale = panelTrajet.ClientSize.Width - (paddingLateral * 2);
-                int rayonStation = 8; 
-
-   
-                int hauteurTitre = 50;
-                Rectangle zoneHeader = new Rectangle(10, 10, panelTrajet.ClientSize.Width - 20, hauteurTitre);
-                g.FillRectangle(new SolidBrush(Color.FromArgb(240, 240, 250)), zoneHeader);
-                g.DrawRectangle(Pens.LightGray, zoneHeader);
-
-        
-                g.DrawString($"Temps de trajet: {infos.TempsTrajet} minutes",
-                    titreFont, Brushes.DarkBlue, zoneHeader.X + 10, zoneHeader.Y + 15);
-
-                int yPosition = hauteurTitre + 30; 
-
-                HashSet<string> segmentsAffichés = new HashSet<string>();
-
-                foreach (var segment in segmentsParLigne)
-                {
-                    try
-                    {
-                        if (segmentsAffichés.Contains(segment))
-                            continue;
-
-                        segmentsAffichés.Add(segment);
-
-                        string[] parts = segment.Split(':');
-                        if (parts.Length != 2) continue;
-
-                        string ligne = parts[0].Replace("Ligne ", "").Trim();
-                        string[] stations = parts[1].Split('→');
-                        if (stations.Length != 2) continue;
-
-                        string stationDepart = stations[0].Trim();
-                        string stationArrivee = stations[1].Trim();
-
-                        SizeF tailleDepart = g.MeasureString(stationDepart, stationFont);
-                        SizeF tailleArrivee = g.MeasureString(stationArrivee, stationFont);
-                        SizeF tailleLigne = g.MeasureString($"Ligne {ligne}", numLigneFont);
-
-                        Color couleurLigne = Color.Red;
-                        if (couleursParLigne.TryGetValue(ligne, out Color couleur))
-                            couleurLigne = couleur;
-
-                        using (Pen penLigne = new Pen(couleurLigne, 6))
-                        {
-                            // Dessiner la ligne horizontale
-                            g.DrawLine(penLigne, paddingLateral, yPosition, paddingLateral + largeurTotale, yPosition);
-
-                            // Dessiner les stations (cercles)
-                            int yCircle = yPosition - rayonStation;
-                            // Station de départ
-                            g.FillEllipse(Brushes.White, paddingLateral - rayonStation, yCircle, rayonStation * 2, rayonStation * 2);
-                            g.DrawEllipse(Pens.Black, paddingLateral - rayonStation, yCircle, rayonStation * 2, rayonStation * 2);
-
-                            // Station d'arrivée
-                            g.FillEllipse(Brushes.White, paddingLateral + largeurTotale - rayonStation, yCircle, rayonStation * 2, rayonStation * 2);
-                            g.DrawEllipse(Pens.Black, paddingLateral + largeurTotale - rayonStation, yCircle, rayonStation * 2, rayonStation * 2);
-
-                            // Dessiner les noms des stations avec centrage
-                            float xDepartText = Math.Max(10, paddingLateral - (tailleDepart.Width / 2));
-                            g.DrawString(stationDepart, stationFont, Brushes.Black, xDepartText, yPosition + 15);
-
-                            float xArriveeText = paddingLateral + largeurTotale - (tailleArrivee.Width / 2);
-                            g.DrawString(stationArrivee, stationFont, Brushes.Black, xArriveeText, yPosition + 15);
-
-                            // Rectangle pour le numéro de ligne (avec fond blanc semi-transparent)
-                            float xLigneText = paddingLateral + (largeurTotale / 2) - (tailleLigne.Width / 2);
-                            RectangleF rectLigne = new RectangleF(xLigneText - 4, yPosition + 40, tailleLigne.Width + 8, tailleLigne.Height + 2);
-                            g.FillRectangle(new SolidBrush(Color.FromArgb(230, 255, 255, 255)), rectLigne);
-
-                            // Dessiner le numéro de ligne en dessous
-                            using (SolidBrush brush = new SolidBrush(couleurLigne))
-                            {
-                                g.DrawString($"Ligne {ligne}", numLigneFont, brush, xLigneText, yPosition + 40);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // En cas d'erreur de format, continuer avec le segment suivant
-                        System.Diagnostics.Debug.WriteLine($"Erreur d'affichage pour segment: {segment}. {ex.Message}");
-                    }
-
-                    yPosition += hauteurSegment; // Passage au segment suivant
-                }
-
-                // Assurer que le panel a une taille suffisante pour tout afficher
-                panelTrajet.AutoScrollMinSize = new Size(panelTrajet.ClientSize.Width, yPosition + 20);
-            };
-
-            formTrajet.Controls.Add(panelTrajet);
+            var formTrajet = new Form_Trajet(infos.Chemin, infos.TempsTrajet, $"Trajet de {infos.CuisinierAdresse} ➔ {infos.ClientAdresse}");
             formTrajet.ShowDialog();
-        }
-
-        private List<string> ExtraireTrajetParLigne(List<Noeud<Station>> chemin)
-        {
-            var lignesDetaillees = new List<string>();
-
-            if (chemin == null || chemin.Count < 2) return lignesDetaillees;
-
-            string ligneActuelle = chemin[0].Valeur.Ligne;
-            string depart = chemin[0].Valeur.Nom;
-
-            for (int i = 1; i < chemin.Count; i++)
-            {
-                var courant = chemin[i - 1];
-                var suivant = chemin[i];
-
-                if (courant.Valeur.Nom == suivant.Valeur.Nom)
-                {
-                    continue;
-                }
-
-                if (suivant.Valeur.Ligne != ligneActuelle)
-                {
-                    lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} → {courant.Valeur.Nom}");
-                    depart = courant.Valeur.Nom;
-                    ligneActuelle = suivant.Valeur.Ligne;
-                }
-            }
-            if (depart != chemin.Last().Valeur.Nom)
-            {
-                lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} → {chemin.Last().Valeur.Nom}");
-            }
-
-
-            lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} → {chemin.Last().Valeur.Nom}");
-            return lignesDetaillees;
         }
 
 
@@ -589,7 +459,7 @@ namespace ProjetLivInParis
                         {
                             // 1. Insérer la commande
                             string insertCmd = @"INSERT INTO Commande (DateCommande, AdresseLivraison, PrixTotal, Statut, ModePaiement, ClientID)
-                                        VALUES (NOW(), @AdresseLivraison, @PrixTotal, 'En préparation', 'En attente', @ClientID)";
+                                        VALUES (NOW(), @AdresseLivraison, @PrixTotal, 'En cours', 'En attente', @ClientID)";
 
                             using (MySqlCommand cmd = new MySqlCommand(insertCmd, conn, transaction))
                             {
@@ -641,7 +511,7 @@ namespace ProjetLivInParis
                                 // Rafraîchir la liste des plats
                                 listPlats.Items.Clear();
                                 informationsPlats.Clear();  // Très important aussi pour ne pas garder l'ancien dictionnaire
-                                ChargerPlats(infos.ClientAdresse);  // Recharge la liste proprement !
+                                ChargerPlatsDisponibles();  // Recharge la liste proprement !
 
                                 if (listPlats.Items.Count == 0)
                                 {
