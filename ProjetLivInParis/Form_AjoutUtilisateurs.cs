@@ -9,7 +9,7 @@ namespace ProjetLivInParis
     {
         private TextBox txtNom, txtPrenom, txtTelephone, txtEmail, txtMotDePasse;
         private ComboBox cbAdresse;
-        private RadioButton rbClient, rbCuisinier;
+        private RadioButton rbClient, rbCuisinier, rbClientEtCuisinier;
         private ComboBox cbTypeClient;
         private TextBox txtNomEntreprise, txtReferent;
         private Button btnAjouter;
@@ -93,11 +93,16 @@ namespace ProjetLivInParis
             txtMotDePasse = new TextBox() { Left = 130, Top = top, Width = 300, UseSystemPasswordChar = true };
             top += 40;
 
-            rbClient = new RadioButton() { Text = "Client", Left = 130, Top = top };
-            rbCuisinier = new RadioButton() { Text = "Cuisinier", Left = 250, Top = top };
+            Label lblRole = new Label() { Text = "Rôle :", Left = 20, Top = top, Width = labelWidth };
+            rbClient = new RadioButton() { Text = "Client", Left = 130, Top = top, Width = 80 };
+            rbCuisinier = new RadioButton() { Text = "Cuisinier", Left = 210, Top = top, Width = 95 };
+            rbClientEtCuisinier = new RadioButton() { Text = "Client et Cuisinier", Left = 310, Top = top, Width = 150 };
             rbClient.Checked = true;
             rbClient.CheckedChanged += RbClient_CheckedChanged;
+            rbCuisinier.CheckedChanged += RbClient_CheckedChanged;
+            rbClientEtCuisinier.CheckedChanged += RbClient_CheckedChanged;
             top += 35;
+
 
             Label lblTypeClient = new Label() { Text = "Type client :", Left = 20, Top = top, Width = labelWidth };
             cbTypeClient = new ComboBox() { Left = 130, Top = top, Width = 150 };
@@ -119,15 +124,16 @@ namespace ProjetLivInParis
             btnAjouter.Click += BtnAjouter_Click;
 
             Controls.AddRange(new Control[]
-            {
+           {
                 lblNom, txtNom, lblPrenom, txtPrenom, lblAdresse, cbAdresse,
                 lblTelephone, txtTelephone, lblEmail, txtEmail, lblMotDePasse, txtMotDePasse,
-                rbClient, rbCuisinier,
+                lblRole, rbClient, rbCuisinier, rbClientEtCuisinier, 
                 lblTypeClient, cbTypeClient,
                 lblNomEntreprise, txtNomEntreprise,
                 lblReferent, txtReferent,
                 btnAjouter
-            });
+           });
+
 
             CbTypeClient_SelectedIndexChanged(null, null);
             RbClient_CheckedChanged(null, null);
@@ -152,10 +158,14 @@ namespace ProjetLivInParis
 
         private void RbClient_CheckedChanged(object sender, EventArgs e)
         {
-            bool isClient = rbClient.Checked;
-            cbTypeClient.Visible = isClient;
-            txtNomEntreprise.Visible = isClient;
-            txtReferent.Visible = isClient;
+            bool showClientControls = rbClient.Checked || rbClientEtCuisinier.Checked;
+            cbTypeClient.Visible = showClientControls;
+            txtNomEntreprise.Visible = showClientControls;
+            txtReferent.Visible = showClientControls;
+            if (showClientControls) 
+            {
+                CbTypeClient_SelectedIndexChanged(null, null);
+            }
         }
 
         private void CbTypeClient_SelectedIndexChanged(object sender, EventArgs e)
@@ -183,7 +193,10 @@ namespace ProjetLivInParis
 
                 int idUtilisateur = db.InsererUtilisateur(nom, prenom, adresse, telephone, email, motDePasse);
 
-                if (rbClient.Checked)
+                bool isClient = rbClient.Checked || rbClientEtCuisinier.Checked;
+                bool isCuisinier = rbCuisinier.Checked || rbClientEtCuisinier.Checked;
+
+                if (isClient)
                 {
                     string typeClient = cbTypeClient.SelectedItem.ToString();
                     string nomEntreprise = txtNomEntreprise.Text.Trim();
@@ -191,20 +204,27 @@ namespace ProjetLivInParis
 
                     db.InsererClient(idUtilisateur, typeClient, nomEntreprise, referent);
                 }
-                else
+
+                if (isCuisinier)
                 {
                     db.InsererCuisinier(idUtilisateur);
                 }
 
                 db.FermerConnexion();
-                MessageBox.Show("Utilisateur ajouté avec succès ", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.Close(); // ou vider les champs si tu veux enchaîner
+
+                if (rbClientEtCuisinier.Checked)
+                    MessageBox.Show("Utilisateur ajouté comme client et cuisinier avec succès", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                else
+                    MessageBox.Show("Utilisateur ajouté avec succès", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                this.Close(); 
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Erreur lors de l'ajout : " + ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         private bool ValiderDonnees()
         {
             // Validation du téléphone (10 chiffres collés)

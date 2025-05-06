@@ -173,9 +173,43 @@ namespace Project_LivInParis
 
             return cuisiniers;
         }
+        public List<Commande> RecupererToutesLesCommandes()
+        {
+            List<Commande> commandes = new List<Commande>();
+
+            string query = @"
+        SELECT c.CommandeID, c.DateCommande, c.AdresseLivraison, c.PrixTotal, c.Statut, 
+               c.ModePaiement, i.ID AS ClientID, i.Nom AS ClientNom, i.Prenom AS ClientPrenom
+        FROM Commande c
+        JOIN Identite i ON c.ClientID = i.ID";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, connexion))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Commande commande = new Commande
+                    {
+                        CommandeID = reader.GetInt32("CommandeID"),
+                        DateCommande = reader.GetDateTime("DateCommande"),
+                        AdresseLivraison = reader.GetString("AdresseLivraison"),
+                        PrixTotal = reader.GetDecimal("PrixTotal"),
+                        Statut = reader.GetString("Statut"),
+                        ModePaiement = reader.GetString("ModePaiement"),
+                        ClientID = reader.GetInt32("ClientID"),
+                        ClientNom = reader.GetString("ClientNom"),
+                        ClientPrenom = reader.GetString("ClientPrenom")
+                    };
+
+                    commandes.Add(commande);
+                }
+            }
+
+            return commandes;
+        }
         #endregion
 
-        #region ajouter des utilisateurs BDD depuis visual studio 2022
+        #region ajouter des utilisateurs BDD depuis visual studio
 
         /// <summary>
         /// Insère un utilisateur dans la table utilisateurs et retourne l'ID inséré.
@@ -228,7 +262,9 @@ namespace Project_LivInParis
         }
         #endregion
 
-        #region supprimer des utilisateur BDD dpuis visual studio 2022
+        #region supprimer données BDD depuis visual studio
+
+        #region supprimer des utilisateur BDD depuis visual studio
         public bool SupprimerUtilisateur(int idUtilisateur)
         {
             try
@@ -267,104 +303,17 @@ namespace Project_LivInParis
         }
         #endregion
 
-        #region afficher utilisateurs
-
-        public void AfficherUtilisateurs()
-        {
-            string sql = "SELECT * FROM identite";
-
-            using var cmd = new MySqlCommand(sql, connexion);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                Console.WriteLine($"ID: {reader["id"]}, Nom: {reader["nom"]}, Prénom: {reader["prenom"]}, Email: {reader["email"]}");
-            }
-        }
-        #endregion
-        public bool MettreAJourUtilisateur(Utilisateur user)
-        {
-            try
-            {
-                using (MySqlCommand cmd = new MySqlCommand())
-                {
-                    cmd.Connection = connexion;
-                    cmd.CommandText = @"
-                UPDATE Identite
-                SET 
-                    Nom = @Nom,
-                    Prenom = @Prenom,
-                    Email = @Email,
-                    Telephone = @Telephone,
-                    Adresse = @Adresse,
-                    MotDePasse = @MotDePasse
-                WHERE ID = @ID";
-
-                    cmd.Parameters.AddWithValue("@Nom", user.Nom);
-                    cmd.Parameters.AddWithValue("@Prenom", user.Prenom);
-                    cmd.Parameters.AddWithValue("@Email", user.Email);
-                    cmd.Parameters.AddWithValue("@Telephone", user.Telephone);
-                    cmd.Parameters.AddWithValue("@Adresse", user.Adresse);  // ➔ Adresse ajoutée ici
-                    cmd.Parameters.AddWithValue("@MotDePasse", user.MotDePasse);
-                    cmd.Parameters.AddWithValue("@ID", user.ID);
-
-                    int rows = cmd.ExecuteNonQuery();
-                    return rows > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Erreur lors de la mise à jour: " + ex.Message);
-                return false;
-            }
-        }
-        public List<Commande> RecupererToutesLesCommandes()
-        {
-            List<Commande> commandes = new List<Commande>();
-
-            string query = @"
-        SELECT c.CommandeID, c.DateCommande, c.AdresseLivraison, c.PrixTotal, c.Statut, 
-               c.ModePaiement, i.ID AS ClientID, i.Nom AS ClientNom, i.Prenom AS ClientPrenom
-        FROM Commande c
-        JOIN Identite i ON c.ClientID = i.ID";
-
-            using (MySqlCommand cmd = new MySqlCommand(query, connexion))
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    Commande commande = new Commande
-                    {
-                        CommandeID = reader.GetInt32("CommandeID"),
-                        DateCommande = reader.GetDateTime("DateCommande"),
-                        AdresseLivraison = reader.GetString("AdresseLivraison"),
-                        PrixTotal = reader.GetDecimal("PrixTotal"),
-                        Statut = reader.GetString("Statut"),
-                        ModePaiement = reader.GetString("ModePaiement"),
-                        ClientID = reader.GetInt32("ClientID"),
-                        ClientNom = reader.GetString("ClientNom"),
-                        ClientPrenom = reader.GetString("ClientPrenom")
-                    };
-
-                    commandes.Add(commande);
-                }
-            }
-
-            return commandes;
-        }
+        #region supprimer des commandes BDD depuis visual studio
         public bool SupprimerCommande(int commandeId)
         {
             try
             {
-                // 🔥 Supprimer d'abord les plats liés (pour éviter les erreurs de clé étrangère)
                 string deletePlatsQuery = "DELETE FROM Plat WHERE CommandeID = @CommandeID";
                 using (MySqlCommand cmdPlats = new MySqlCommand(deletePlatsQuery, connexion))
                 {
                     cmdPlats.Parameters.AddWithValue("@CommandeID", commandeId);
                     cmdPlats.ExecuteNonQuery();
                 }
-
-                // 🚮 Supprimer la commande
                 string deleteCommandeQuery = "DELETE FROM Commande WHERE CommandeID = @CommandeID";
                 using (MySqlCommand cmdCmd = new MySqlCommand(deleteCommandeQuery, connexion))
                 {
@@ -378,7 +327,61 @@ namespace Project_LivInParis
                 return false;
             }
         }
+        #endregion
 
+        #endregion
+
+        #region afficher et modifier informations utilisateurs
+
+        public void AfficherUtilisateurs()
+        {
+            string sql = "SELECT * FROM identite";
+
+            using var cmd = new MySqlCommand(sql, connexion);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Console.WriteLine($"ID: {reader["id"]}, Nom: {reader["nom"]}, Prénom: {reader["prenom"]}, Email: {reader["email"]}");
+            }
+        }
+        public bool MettreAJourUtilisateur(Utilisateur user)
+        {
+            try
+            {
+                using (MySqlCommand cmd = new MySqlCommand())
+                {
+                    cmd.Connection = connexion;
+                    cmd.CommandText = @"
+                    UPDATE Identite
+                    SET 
+                        Nom = @Nom,
+                        Prenom = @Prenom,
+                        Email = @Email,
+                        Telephone = @Telephone,
+                        Adresse = @Adresse,
+                        MotDePasse = @MotDePasse
+                    WHERE ID = @ID";
+
+                    cmd.Parameters.AddWithValue("@Nom", user.Nom);
+                    cmd.Parameters.AddWithValue("@Prenom", user.Prenom);
+                    cmd.Parameters.AddWithValue("@Email", user.Email);
+                    cmd.Parameters.AddWithValue("@Telephone", user.Telephone);
+                    cmd.Parameters.AddWithValue("@Adresse", user.Adresse);
+                    cmd.Parameters.AddWithValue("@MotDePasse", user.MotDePasse);
+                    cmd.Parameters.AddWithValue("@ID", user.ID);
+
+                    int rows = cmd.ExecuteNonQuery();
+                    return rows > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur lors de la mise à jour: " + ex.Message);
+                return false;
+            }
+        }
+        #endregion
 
     }
 }
