@@ -169,7 +169,7 @@ namespace ProjetLivInParis
             };
             btnVoirPlats.Click += (s, e) =>
             {
-                var form = new Form_MesPlats(userId);
+                var form = new Form_PlatsCuisinier(userId);
                 form.ShowDialog();
             };
             grpGestion.Controls.Add(btnVoirPlats);

@@ -70,8 +70,12 @@ namespace ProjetLivInParis
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = @"SELECT PlatID, Nom, Quantite, Prix, Regime, Date_de_peremption, CommandeID 
-                                 FROM Plat WHERE CuisinierID = @CuisinierID";
+                string query = @"SELECT PlatID, Nom, Quantite, Prix, Regime, Date_de_peremption 
+                               FROM Plat 
+                               WHERE CuisinierID = @CuisinierID 
+                               AND CommandeID IS NULL 
+                               AND Quantite > 0 
+                               AND Date_de_peremption >= CURDATE()";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
