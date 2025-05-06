@@ -179,9 +179,10 @@ namespace Project_LivInParis
 
             string query = @"
         SELECT c.CommandeID, c.DateCommande, c.AdresseLivraison, c.PrixTotal, c.Statut, 
-               c.ModePaiement, i.ID AS ClientID, i.Nom AS ClientNom, i.Prenom AS ClientPrenom
+               c.ModePaiement, i.ID AS ClientID, i.Nom AS ClientNom, i.Prenom AS ClientPrenom, p.Nom AS NomPlat
         FROM Commande c
-        JOIN Identite i ON c.ClientID = i.ID";
+        JOIN Identite i ON c.ClientID = i.ID
+        JOIN Plat p ON p.CommandeID = c.CommandeID";
 
             using (MySqlCommand cmd = new MySqlCommand(query, connexion))
             using (MySqlDataReader reader = cmd.ExecuteReader())

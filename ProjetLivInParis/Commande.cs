@@ -14,5 +14,6 @@ namespace Project_LivInParis
         public int ClientID { get; set; }
         public string ClientNom { get; set; }
         public string ClientPrenom { get; set; }
+        public string NomPlat { get; set; }
     }
 }
