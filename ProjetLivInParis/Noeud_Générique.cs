@@ -8,7 +8,7 @@ namespace Project_LivInParis
 {
     public class Noeud<T>
     {
-        #region propriétés
+        #region champs et propriétés
 
         public T Valeur { get; set; }
         public int Id { get; }  

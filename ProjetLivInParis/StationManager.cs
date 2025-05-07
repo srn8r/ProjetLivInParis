@@ -6,11 +6,14 @@ namespace Project_LivInParis
 {
     public class StationManager
     {
+        #region champs
         private MySqlConnection maConnexion;
         private Graphe<Station> graphe;
         private Dictionary<int, Noeud<Station>> stations;
         private Dictionary<string, List<Noeud<Station>>> correspondances;
+        #endregion
 
+        #region constructeur
         public StationManager(string connectionString)
         {
             graphe = new Graphe<Station>();
@@ -18,7 +21,9 @@ namespace Project_LivInParis
             correspondances = new Dictionary<string, List<Noeud<Station>>>();
             maConnexion = new MySqlConnection(connectionString);
         }
+        #endregion
 
+        #region méthodes chargement de données
         public void ChargerStationsDepuisBDD()
         {
             try
@@ -32,7 +37,6 @@ namespace Project_LivInParis
                 {
                     int stationId = reader.GetInt32("StationId");
 
-                    // ❌ Ignore les stations sans coordonnées ou ligne vide (id=0)
                     if (stationId == 0 || reader.IsDBNull(reader.GetOrdinal("Latitude")) || reader.IsDBNull(reader.GetOrdinal("Longitude")))
                         continue;
 
@@ -112,7 +116,9 @@ namespace Project_LivInParis
                 }
             }
         }
+        #endregion
 
+        #region méthodes d'accès et d'affichage
         public Graphe<Station> ObtenirGraphe()
         {
             return graphe;
@@ -130,5 +136,6 @@ namespace Project_LivInParis
                 Console.WriteLine();
             }
         }
+        #endregion
     }
 }

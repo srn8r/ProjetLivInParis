@@ -8,7 +8,7 @@ namespace Project_LivInParis
 {
     public class Lien<T>
     {
-        #region propriétés
+        #region champs et propriétés
 
         public Noeud<T> Source { get; }
         public Noeud<T> Destination { get; }

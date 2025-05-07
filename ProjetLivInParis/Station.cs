@@ -8,6 +8,7 @@ namespace Project_LivInParis
 {
     public class Station
     {
+        #region champs et propriétés
         public int Identifiant { get; set; }
         public string Nom { get; set; }
         public string Precedent { get; set; }
@@ -17,7 +18,9 @@ namespace Project_LivInParis
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public string Ligne { get; set; }
+        #endregion
 
+        #region constructeur
         public Station(int identifiant, string nom, string precedent, string suivant, string tempsEntre, string tempsChangement, double longitude, double latitude, string ligne)
         {
             Identifiant = identifiant;
@@ -30,6 +33,7 @@ namespace Project_LivInParis
             Latitude = latitude;
             Ligne = ligne;
         }
+        #endregion
     }
 
 }
