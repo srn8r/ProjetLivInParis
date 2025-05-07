@@ -167,7 +167,6 @@ namespace ProjetLivInParis
                 {
                     conn.Open();
 
-                    // Supprimer le plat lié à cette commande
                     string deletePlat = "DELETE FROM Plat WHERE CommandeID = @CommandeID";
                     using (MySqlCommand cmdPlat = new MySqlCommand(deletePlat, conn))
                     {

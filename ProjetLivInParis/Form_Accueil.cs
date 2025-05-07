@@ -30,7 +30,6 @@ namespace TestLinInParis
             this.BackColor = Color.DarkMagenta;
             this.Resize += FormAccueil_Resize;
 
-            // Titre
             lblTitre = new Label
             {
                 Text = "LivInParis",
@@ -42,7 +41,6 @@ namespace TestLinInParis
             this.Controls.Add(lblTitre);
             lblTitre.BringToFront();
 
-            // Sous-titre
             lblSousTitre = new Label
             {
                 Text = "Livraison de vos commandes dans Paris",
@@ -54,7 +52,6 @@ namespace TestLinInParis
             this.Controls.Add(lblSousTitre);
             lblSousTitre.BringToFront();
 
-            // Bouton Admin
             btnAdmin = new Button
             {
                 Text = "Admin",

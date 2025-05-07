@@ -149,7 +149,6 @@ namespace ProjetLivInParis
         #region méthodes
         private void ChargerStationsMetro()
         {
-            // Récupérer toutes les stations uniques du graphe
             var graphe = stationManager.ObtenirGraphe();
             var stationsUniques = graphe.Noeuds
                 .Select(n => n.Valeur.Nom)
@@ -159,7 +158,7 @@ namespace ProjetLivInParis
 
             cbAdresse.Items.AddRange(stationsUniques);
 
-            // Sélectionner la première station par défaut si disponible
+            /// Sélectionner la première station par défaut si disponible
             if (cbAdresse.Items.Count > 0)
                 cbAdresse.SelectedIndex = 0;
         }
@@ -235,7 +234,7 @@ namespace ProjetLivInParis
 
         private bool ValiderDonnees()
         {
-            // Validation du téléphone (10 chiffres collés)
+            /// Validation du téléphone (10 chiffres collés)
             if (!Regex.IsMatch(txtTelephone.Text.Trim(), @"^\d{10}$"))
             {
                 MessageBox.Show("Le numéro de téléphone doit contenir exactement 10 chiffres sans espaces ni caractères spéciaux.",
@@ -244,7 +243,7 @@ namespace ProjetLivInParis
                 return false;
             }
 
-            // Validation de l'email (contient @ et pas de majuscules)
+            /// Validation de l'email (contient @ et pas de majuscules)
             string email = txtEmail.Text.Trim();
             if (!email.Contains("@") || email != email.ToLower())
             {
@@ -254,7 +253,7 @@ namespace ProjetLivInParis
                 return false;
             }
 
-            // Validation de l'adresse (une station de métro doit être sélectionnée)
+            /// Validation de l'adresse (une station de métro doit être sélectionnée)
             if (cbAdresse.SelectedIndex < 0)
             {
                 MessageBox.Show("Veuillez sélectionner une station de métro comme adresse.",
@@ -263,7 +262,7 @@ namespace ProjetLivInParis
                 return false;
             }
 
-            // Validation des champs obligatoires
+            /// Validation des champs obligatoires
             if (string.IsNullOrWhiteSpace(txtNom.Text) || string.IsNullOrWhiteSpace(txtPrenom.Text) ||
                 string.IsNullOrWhiteSpace(txtMotDePasse.Text))
             {
@@ -272,7 +271,7 @@ namespace ProjetLivInParis
                 return false;
             }
 
-            // Validation des champs spécifiques au type d'entreprise
+            /// Validation des champs spécifiques au type d'entreprise
             if (rbClient.Checked && cbTypeClient.SelectedItem?.ToString() == "Entreprise")
             {
                 if (string.IsNullOrWhiteSpace(txtNomEntreprise.Text) || string.IsNullOrWhiteSpace(txtReferent.Text))

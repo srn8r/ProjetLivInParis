@@ -67,14 +67,12 @@ namespace Project_LivInParis
                         graphe.AjouterLien(stations[precedentId], stations[stationId], tempsEntre, bidirectionnel: true);
                     }
 
-                    // Lien avec station suivante
                     if (!string.IsNullOrEmpty(suivant) && int.TryParse(suivant, out int suivantId) && stations.ContainsKey(suivantId))
                     {
                         double tempsEntre = double.TryParse(tempsEntreStr, out double t2) ? t2 : 0;
                         graphe.AjouterLien(stations[stationId], stations[suivantId], tempsEntre, bidirectionnel: true);
                     }
 
-                    // Gestion des correspondances
                     if (!string.IsNullOrEmpty(tempsChangementStr) && tempsChangementStr != "0")
                     {
                         if (!correspondances.ContainsKey(nom))

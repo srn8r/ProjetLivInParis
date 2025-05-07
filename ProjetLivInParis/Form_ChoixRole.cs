@@ -33,7 +33,6 @@ namespace ProjetLivInParis
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
 
-            // Message de bienvenue
             lblMessage = new Label
             {
                 Text = $"Bienvenue {prenom} !\nVeuillez choisir votre rôle :",

@@ -30,17 +30,13 @@
         {
             panel1 = new Panel();
             SuspendLayout();
-            // 
-            // panel1
-            // 
+
             panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
             panel1.Size = new Size(933, 435);
             panel1.TabIndex = 0;
-            // 
-            // Form1
-            // 
+
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(933, 435);

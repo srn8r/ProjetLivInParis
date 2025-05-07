@@ -29,7 +29,6 @@ namespace ProjetLivInParis
             XmlDocument xmlDoc = new XmlDocument();
             XmlDeclaration xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "UTF-8", null);
 
-            // Créer l'élément racine
             XmlElement root = xmlDoc.CreateElement("livinparis");
             root.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
             root.SetAttribute("xsi:noNamespaceSchemaLocation", "livinparis_schema.xsd");
@@ -37,7 +36,6 @@ namespace ProjetLivInParis
             xmlDoc.AppendChild(xmlDeclaration);
             xmlDoc.AppendChild(root);
 
-            // Créer les éléments principaux
             XmlElement identitesElement = xmlDoc.CreateElement("identites");
             XmlElement clientsElement = xmlDoc.CreateElement("clients");
             XmlElement cuisiniersElement = xmlDoc.CreateElement("cuisiniers");
@@ -54,25 +52,19 @@ namespace ProjetLivInParis
             {
                 connection.Open();
 
-                // Importer les données d'identité
                 ImportIdentites(connection, xmlDoc, identitesElement);
 
-                // Importer les données de client
                 ImportClients(connection, xmlDoc, clientsElement);
 
-                // Importer les données de cuisinier
                 ImportCuisiniers(connection, xmlDoc, cuisiniersElement);
 
-                // Importer les données de commande
                 ImportCommandes(connection, xmlDoc, commandesElement);
 
-                // Importer les données de plat
                 ImportPlats(connection, xmlDoc, platsElement);
 
                 connection.Close();
             }
 
-            // Enregistrer le document XML
             xmlDoc.Save(xmlOutputPath);
             Console.WriteLine($"Données exportées avec succès vers {xmlOutputPath}");
         }

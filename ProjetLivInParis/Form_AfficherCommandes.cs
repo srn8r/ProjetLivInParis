@@ -209,7 +209,6 @@ namespace ProjetLivInParis
 
             if (result == DialogResult.Yes)
             {
-                // Double confirmation pour éviter les erreurs
                 DialogResult secondConfirmation = MessageBox.Show(
                     "Dernière chance : Confirmez-vous la suppression de TOUTES les commandes ?",
                     "⚠️ Confirmation finale",

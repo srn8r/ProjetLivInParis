@@ -74,7 +74,6 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(btnVoirCommandes);
 
-            // Bouton Afficher le Graphe
             btnAfficherGraphe = new Button
             {
                 Text = "Afficher le graphe",
@@ -92,7 +91,6 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(btnAfficherGraphe);
 
-            // ✅ NOUVEAU : Bouton Coloration du Graphe
             btnColoration = new Button
             {
                 Text = "Coloration du graphe",
@@ -105,7 +103,6 @@ namespace ProjetLivInParis
             };
             btnColoration.Click += (s, e) =>
             {
-                // 👉 Ouvre la future form qui montrera la coloration (à créer)
                 var graphe = new GrapheCommandes();
                 graphe.CreerDepuisBDD();
                 graphe.AppliquerColorationWelshPowell();
