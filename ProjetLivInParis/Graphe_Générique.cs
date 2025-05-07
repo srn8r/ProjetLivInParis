@@ -8,7 +8,7 @@ namespace Project_LivInParis
 {
     public class Graphe<T>
     {
-        #region Propriétés
+        #region Champs et propriétés
         public List<Noeud<T>> Noeuds { get; set; }
         public List<Lien<T>> Liens { get; set; }
         #endregion

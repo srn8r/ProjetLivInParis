@@ -7,11 +7,14 @@ namespace ProjetLivInParis
 {
     public class GrapheCommandes
     {
+        #region champs et propriétés
         public List<Sommet> Sommets { get; set; } = new();
         public List<Arete> Aretes { get; set; } = new();
 
         private string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+        #endregion
 
+        #region accès données
         public void CreerDepuisBDD()
         {
             Dictionary<int, Sommet> sommetsDict = new();
@@ -88,7 +91,9 @@ namespace ProjetLivInParis
                 }
             }
         }
+        #endregion
 
+        #region algo de graphe
         public void AppliquerColorationWelshPowell()
         {
             var degres = new Dictionary<Sommet, int>();
@@ -115,7 +120,6 @@ namespace ProjetLivInParis
                 couleurActuelle++;
             }
         }
-
         private List<Sommet> ObtenirVoisins(Sommet sommet)
         {
             var voisins = new List<Sommet>();
@@ -128,8 +132,10 @@ namespace ProjetLivInParis
             }
             return voisins;
         }
+        #endregion
     }
 
+    #region classes  
     public class Sommet
     {
         public int Id { get; set; }
@@ -137,10 +143,10 @@ namespace ProjetLivInParis
         public string Type { get; set; }
         public int Couleur { get; set; } = -1;
     }
-
     public class Arete
     {
         public Sommet Source { get; set; }
         public Sommet Cible { get; set; }
     }
+    #endregion
 }
