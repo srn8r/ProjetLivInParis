@@ -80,7 +80,7 @@ namespace ProjetLivInParis
             grpAjout.Controls.Add(numQuantite);
             top += spacingY;
 
-            grpAjout.Controls.Add(CreateLabel("Date de fabrication :", top, leftLabel));
+            grpAjout.Controls.Add(CreateLabel("Fabriqué le :", top, leftLabel));
             dpFabrication = new DateTimePicker
             {
                 Top = top,
@@ -92,7 +92,7 @@ namespace ProjetLivInParis
             grpAjout.Controls.Add(dpFabrication);
             top += spacingY;
 
-            grpAjout.Controls.Add(CreateLabel("Date de péremption :", top, leftLabel));
+            grpAjout.Controls.Add(CreateLabel("Périme le :", top, leftLabel));
             dpPeremption = new DateTimePicker
             {
                 Top = top,

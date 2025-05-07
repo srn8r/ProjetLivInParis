@@ -23,7 +23,7 @@ namespace ProjetLivInParis
         {
             InitializeComponent();
             this.Text = "Gestion des Commandes";
-            this.Size = new Size(900, 600);
+            this.Size = new Size(1200, 600);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.Lavender;
 
@@ -35,7 +35,6 @@ namespace ProjetLivInParis
         #region structure
         private void InitialiserComposants()
         {
-            // Titre
             lblTitre = new Label
             {
                 Text = "Toutes les commandes",
@@ -46,20 +45,18 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(lblTitre);
 
-            // ListView
             lvCommandes = new ListView
             {
                 View = View.Details,
                 FullRowSelect = true,
                 GridLines = true,
                 Location = new Point(20, 60),
-                Size = new Size(840, 400)
+                Size = new Size(1140, 400)
             };
 
-            // Colonnes
-            lvCommandes.Columns.Add("Commande", 50);
+            lvCommandes.Columns.Add("Commande", 100);
+            lvCommandes.Columns.Add("Nom du plat", 195);
             lvCommandes.Columns.Add("Date", 140);
-            lvCommandes.Columns.Add("Nom du plat", 200);
             lvCommandes.Columns.Add("Adresse Livraison", 180);
             lvCommandes.Columns.Add("Prix Total (€)", 100);
             lvCommandes.Columns.Add("Statut", 120);
@@ -68,7 +65,6 @@ namespace ProjetLivInParis
 
             this.Controls.Add(lvCommandes);
 
-            // Bouton Supprimer
             btnSupprimer = new Button
             {
                 Text = "Supprimer",
@@ -81,7 +77,6 @@ namespace ProjetLivInParis
             btnSupprimer.Click += BtnSupprimer_Click;
             this.Controls.Add(btnSupprimer);
 
-            // Bouton Effacer Tout
             btnEffacerTout = new Button
             {
                 Text = "Effacer Tout",
@@ -94,12 +89,11 @@ namespace ProjetLivInParis
             btnEffacerTout.Click += BtnEffacerTout_Click;
             this.Controls.Add(btnEffacerTout);
 
-            // Bouton Fermer
             btnFermer = new Button
             {
                 Text = "Fermer",
                 Size = new Size(120, 40),
-                Location = new Point(740, 480),
+                Location = new Point(1040, 480),
                 BackColor = Color.Gray,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold)
@@ -124,8 +118,8 @@ namespace ProjetLivInParis
                 foreach (var cmd in commandes)
                 {
                     ListViewItem item = new ListViewItem(cmd.CommandeID.ToString());
-                    item.SubItems.Add(cmd.DateCommande.ToString("g"));
                     item.SubItems.Add(cmd.NomPlat);
+                    item.SubItems.Add(cmd.DateCommande.ToString("dd/MM/yyyy"));
                     item.SubItems.Add(cmd.AdresseLivraison);
                     item.SubItems.Add(cmd.PrixTotal.ToString("0.00"));
                     item.SubItems.Add(cmd.Statut);

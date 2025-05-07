@@ -15,7 +15,7 @@ namespace ProjetLivInParis
         {
             cuisinierId = id;
             this.Text = "Commandes reçues";
-            this.Size = new Size(900, 550);
+            this.Size = new Size(810, 550);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.MediumPurple;
 
@@ -32,19 +32,19 @@ namespace ProjetLivInParis
             lvCommandes = new ListView
             {
                 Location = new Point(20, 60),
-                Width = 840,
+                Width = 750,
                 Height = 350,
                 View = View.Details,
                 FullRowSelect = true,
                 GridLines = true
             };
 
-            lvCommandes.Columns.Add("Commande", 80);
+            lvCommandes.Columns.Add("Commande", 100);
+            lvCommandes.Columns.Add("Plat", 150);
             lvCommandes.Columns.Add("Date", 120);
             lvCommandes.Columns.Add("Adresse", 150);
-            lvCommandes.Columns.Add("Plat", 150);
             lvCommandes.Columns.Add("Prix (€)", 80);
-            lvCommandes.Columns.Add("Statut", 100);
+            lvCommandes.Columns.Add("Statut", 130);
 
             this.Controls.Add(lvCommandes);
 
@@ -52,7 +52,7 @@ namespace ProjetLivInParis
             {
                 Text = "Changer Statut",
                 Size = new Size(160, 40),
-                Location = new Point(700, 420),
+                Location = new Point(610, 420),
                 BackColor = Color.DarkSlateBlue,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10)
@@ -64,7 +64,7 @@ namespace ProjetLivInParis
             {
                 Text = "Fermer",
                 Size = new Size(100, 40),
-                Location = new Point(580, 420),
+                Location = new Point(480, 420),
                 BackColor = Color.IndianRed,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10)
@@ -98,9 +98,9 @@ namespace ProjetLivInParis
                         while (reader.Read())
                         {
                             ListViewItem item = new ListViewItem(reader["CommandeID"].ToString());
-                            item.SubItems.Add(Convert.ToDateTime(reader["DateCommande"]).ToString("g"));
-                            item.SubItems.Add(reader["AdresseLivraison"].ToString());
                             item.SubItems.Add(reader["PlatNom"].ToString());
+                            item.SubItems.Add(Convert.ToDateTime(reader["DateCommande"]).ToString("dd/MM/yyyy"));
+                            item.SubItems.Add(reader["AdresseLivraison"].ToString());
                             item.SubItems.Add(reader["Prix"].ToString());
                             item.SubItems.Add(reader["Statut"].ToString());
 
@@ -138,13 +138,11 @@ namespace ProjetLivInParis
                     cmd.ExecuteNonQuery();
                 }
             }
-
             MessageBox.Show("Statut mis à jour !");
             ChargerCommandes();
         }
     }
 
-    // ➔ Petite classe utilitaire pour demander un input
     public static class Prompt
     {
         public static string ShowDialog(string text, string caption, string defaultValue = "")

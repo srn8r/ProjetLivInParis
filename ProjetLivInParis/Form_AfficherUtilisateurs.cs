@@ -18,7 +18,7 @@ namespace ProjetLivInParis
         {
             InitializeComponent();
             this.Text = "Gestion des Utilisateurs";
-            this.Size = new Size(1000, 750);
+            this.Size = new Size(1190, 750);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.MediumPurple;
             this.Font = new Font("Segoe UI", 10);
@@ -56,7 +56,7 @@ namespace ProjetLivInParis
             lvUtilisateurs = new ListView
             {
                 Location = new Point(25, 110),
-                Width = 930,
+                Width = 1120,
                 Height = 320,
                 View = View.Details,
                 FullRowSelect = true,
@@ -67,16 +67,16 @@ namespace ProjetLivInParis
             lvUtilisateurs.Columns.Add("ID", 50);
             lvUtilisateurs.Columns.Add("Nom", 120);
             lvUtilisateurs.Columns.Add("Prénom", 120);
-            lvUtilisateurs.Columns.Add("Email", 160);
-            lvUtilisateurs.Columns.Add("Téléphone", 110);
-            lvUtilisateurs.Columns.Add("Adresse", 160);
-            lvUtilisateurs.Columns.Add("Type", 90);
-            lvUtilisateurs.Columns.Add("Mot de Passe", 120);
+            lvUtilisateurs.Columns.Add("Email", 220);
+            lvUtilisateurs.Columns.Add("Téléphone", 120);
+            lvUtilisateurs.Columns.Add("Adresse", 210);
+            lvUtilisateurs.Columns.Add("Type", 100);
+            lvUtilisateurs.Columns.Add("Mot de Passe", 140);
 
             lvUtilisateurs.SelectedIndexChanged += LvUtilisateurs_SelectedIndexChanged;
             this.Controls.Add(lvUtilisateurs);
 
-            int labelWidth = 100, tbWidth = 200, lineHeight = 35, startY = 450, spacingY = 40, startX1 = 50, startX2 = 400;
+            int labelWidth = 150, tbWidth = 200, lineHeight = 35, startY = 450, spacingY = 40, startX1 = 50, startX2 = 500;
 
             txtNom = CreateField("Nom:", startX1, startY, labelWidth, tbWidth);
             txtPrenom = CreateField("Prénom:", startX1, startY + spacingY, labelWidth, tbWidth);
@@ -89,7 +89,7 @@ namespace ProjetLivInParis
             {
                 Text = "Enregistrer",
                 Size = new Size(160, 45),
-                Location = new Point(750, startY + spacingY),
+                Location = new Point(950, startY + spacingY),
                 BackColor = Color.DarkSlateBlue,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 11, FontStyle.Bold),
@@ -102,7 +102,7 @@ namespace ProjetLivInParis
             {
                 Text = "Fermer",
                 Size = new Size(120, 40),
-                Location = new Point(820, 620),
+                Location = new Point(1020, 620),
                 BackColor = Color.IndianRed,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10),
@@ -115,7 +115,7 @@ namespace ProjetLivInParis
             {
                 Text = "Supprimer",
                 Size = new Size(120, 40),
-                Location = new Point(680, 620),
+                Location = new Point(880, 620),
                 BackColor = Color.DarkSlateBlue,
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10),
