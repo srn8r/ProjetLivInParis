@@ -57,8 +57,9 @@ namespace ProjetLivInParis
             };
 
             // Colonnes
-            lvCommandes.Columns.Add("ID", 50);
+            lvCommandes.Columns.Add("Commande", 50);
             lvCommandes.Columns.Add("Date", 140);
+            lvCommandes.Columns.Add("Nom du plat", 200);
             lvCommandes.Columns.Add("Adresse Livraison", 180);
             lvCommandes.Columns.Add("Prix Total (€)", 100);
             lvCommandes.Columns.Add("Statut", 120);
@@ -124,11 +125,13 @@ namespace ProjetLivInParis
                 {
                     ListViewItem item = new ListViewItem(cmd.CommandeID.ToString());
                     item.SubItems.Add(cmd.DateCommande.ToString("g"));
+                    item.SubItems.Add(cmd.NomPlat);
                     item.SubItems.Add(cmd.AdresseLivraison);
                     item.SubItems.Add(cmd.PrixTotal.ToString("0.00"));
                     item.SubItems.Add(cmd.Statut);
                     item.SubItems.Add($"{cmd.ClientNom} {cmd.ClientPrenom}");
                     item.SubItems.Add(cmd.ModePaiement);
+
 
                     lvCommandes.Items.Add(item);
                 }
