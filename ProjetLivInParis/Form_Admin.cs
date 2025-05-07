@@ -31,7 +31,6 @@ namespace ProjetLivInParis
             this.BackColor = Color.MediumPurple;
             this.Resize += FormAdmin_Resize;
 
-            // Titre
             lblTitre = new Label
             {
                 Text = "Espace Administrateur",
@@ -42,7 +41,7 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(lblTitre);
 
-            // Bouton Voir Utilisateurs
+
             btnVoirUtilisateurs = new Button
             {
                 Text = "Voir les utilisateurs",
@@ -56,7 +55,6 @@ namespace ProjetLivInParis
             btnVoirUtilisateurs.Click += (s, e) => new Form_AfficherUtilisateurs().ShowDialog();
             this.Controls.Add(btnVoirUtilisateurs);
 
-            // Bouton Voir Commandes
             btnVoirCommandes = new Button
             {
                 Text = "Voir les commandes",
