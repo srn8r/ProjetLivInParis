@@ -32,7 +32,7 @@ namespace ProjetLivInParis
         }
         #endregion
 
-        #region suite constructeur (structure)
+        #region structure
         private void InitialiserComposants()
         {
             // Titre

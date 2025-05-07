@@ -33,7 +33,7 @@ namespace ProjetLivInParis
         }
         #endregion
 
-        #region suite constructeur (structure)
+        #region structure
         private void InitialiserComposants()
         {
             int labelWidth = 100;

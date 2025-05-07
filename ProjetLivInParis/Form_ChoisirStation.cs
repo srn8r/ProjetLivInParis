@@ -12,11 +12,14 @@ namespace ProjetLivInParis
 {
     public partial class Form_ChoisirStation : Form
     {
+        #region champs et propriétés
         public string StationChoisie { get; private set; }
         private TextBox txtRecherche;
         private ListBox lstStations;
         private List<string> toutesStations;
+        #endregion
 
+        #region constructeur
         public Form_ChoisirStation(List<string> stations)
         {
             this.Text = "Choisissez la station de métroqui est proche de votre adresse";
@@ -64,7 +67,9 @@ namespace ProjetLivInParis
             // Remplir la liste complète
             RafraichirListe(stations);
         }
+        #endregion
 
+        #region méthodes
         private void TxtRecherche_TextChanged(object sender, EventArgs e)
         {
             string recherche = txtRecherche.Text.ToLower();
@@ -92,5 +97,6 @@ namespace ProjetLivInParis
                 MessageBox.Show("Veuillez sélectionner une station.", "Attention", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+        #endregion
     }
 }

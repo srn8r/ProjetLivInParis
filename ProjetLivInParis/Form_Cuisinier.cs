@@ -7,6 +7,7 @@ namespace ProjetLivInParis
 {
     public partial class Form_Cuisinier : Form
     {
+        #region propriétés
         private int userId;
         private string prenomCuisinier;
         private TextBox txtNomPlat, txtRegime;
@@ -14,7 +15,9 @@ namespace ProjetLivInParis
         private NumericUpDown numPrix, numQuantite;
         private Button btnAjouter, btnVoirPlats, btnVoirCommandes;
         private Label lblBienvenue;
+        #endregion
 
+        #region constructeur
         public Form_Cuisinier(int id)
         {
             InitializeComponent();
@@ -27,10 +30,11 @@ namespace ProjetLivInParis
             InitialiserUI();
             ChargerPrenomCuisinier();
         }
+        #endregion
 
+        #region structure 
         private void InitialiserUI()
         {
-            // ➔ Label Bienvenue
             lblBienvenue = new Label
             {
                 Text = "Bonjour !",
@@ -41,7 +45,6 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(lblBienvenue);
 
-            // ➔ Panel Gauche : Ajout Plat
             GroupBox grpAjout = new GroupBox
             {
                 Text = "Ajouter un nouveau plat",
@@ -57,13 +60,12 @@ namespace ProjetLivInParis
             int leftLabel = 20, leftInput = 180;
             int labelWidth = 150, inputWidth = 180, spacingY = 50;
 
-            // 🔹 Nom Plat
             grpAjout.Controls.Add(CreateLabel("Nom du plat :", top, leftLabel));
             txtNomPlat = CreateTextBox(top, leftInput, inputWidth);
             grpAjout.Controls.Add(txtNomPlat);
             top += spacingY;
 
-            // 🔹 Quantité
+
             grpAjout.Controls.Add(CreateLabel("Quantité :", top, leftLabel));
             numQuantite = new NumericUpDown
             {
@@ -78,7 +80,6 @@ namespace ProjetLivInParis
             grpAjout.Controls.Add(numQuantite);
             top += spacingY;
 
-            // 🔹 Date fabrication
             grpAjout.Controls.Add(CreateLabel("Date de fabrication :", top, leftLabel));
             dpFabrication = new DateTimePicker
             {
@@ -91,7 +92,6 @@ namespace ProjetLivInParis
             grpAjout.Controls.Add(dpFabrication);
             top += spacingY;
 
-            // 🔹 Date péremption
             grpAjout.Controls.Add(CreateLabel("Date de péremption :", top, leftLabel));
             dpPeremption = new DateTimePicker
             {
@@ -105,7 +105,6 @@ namespace ProjetLivInParis
             grpAjout.Controls.Add(dpPeremption);
             top += spacingY;
 
-            // 🔹 Prix
             grpAjout.Controls.Add(CreateLabel("Prix (€) :", top, leftLabel));
             numPrix = new NumericUpDown
             {
@@ -121,14 +120,12 @@ namespace ProjetLivInParis
             grpAjout.Controls.Add(numPrix);
             top += spacingY;
 
-            // 🔹 Régime
             grpAjout.Controls.Add(CreateLabel("Régime :", top, leftLabel));
             txtRegime = CreateTextBox(top, leftInput, inputWidth);
-            txtRegime.Text = "Standard";  // Valeur par défaut
+            txtRegime.Text = "Standard";  
             grpAjout.Controls.Add(txtRegime);
             top += spacingY + 10;
 
-            // 🔹 Bouton Ajouter
             btnAjouter = new Button
             {
                 Text = "Ajouter le plat",
@@ -143,7 +140,6 @@ namespace ProjetLivInParis
             btnAjouter.Click += BtnAjouter_Click;
             grpAjout.Controls.Add(btnAjouter);
 
-            // ➔ Panel Droite : Gestion des Plats / Commandes
             GroupBox grpGestion = new GroupBox
             {
                 Text = "Mes Actions",
@@ -233,7 +229,7 @@ namespace ProjetLivInParis
                         if (result != null)
                         {
                             prenomCuisinier = result.ToString();
-                            lblBienvenue.Text = $"Bonjour {prenomCuisinier} 👨‍🍳";
+                            lblBienvenue.Text = $"Bonjour {prenomCuisinier}";
                         }
                     }
                 }
@@ -243,6 +239,8 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors de la récupération du prénom : " + ex.Message);
             }
         }
+        #endregion 
+
 
         private void BtnAjouter_Click(object sender, EventArgs e)
         {
