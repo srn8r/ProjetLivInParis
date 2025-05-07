@@ -35,7 +35,11 @@ namespace ProjetLivInParis
 
             this.Controls.Add(panelTrajet);
         }
-
+        /// <summary>
+        /// Dessine le trajet sur le panneau
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void PanelTrajet_Paint(object sender, PaintEventArgs e)
         {
             var g = e.Graphics;
@@ -131,7 +135,11 @@ namespace ProjetLivInParis
                 yPosition += hauteurSegment;
             }
         }
-
+        /// <summary>
+        /// Extrait les trajets par ligne à partir du chemin donné.
+        /// </summary>
+        /// <param name="chemin"></param>
+        /// <returns></returns>
         private List<string> ExtraireTrajetParLigne(List<Noeud<Station>> chemin)
         {
             var lignesDetaillees = new List<string>();

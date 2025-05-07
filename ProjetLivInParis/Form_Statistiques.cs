@@ -55,7 +55,9 @@ namespace ProjetLivInParis
 
             ChargerStatistiques();
         }
-
+        /// <summary>
+        /// Charge les statistiques dans la liste.
+        /// </summary>
         private void ChargerStatistiques()
         {
             var db = new InterfaceBDD();

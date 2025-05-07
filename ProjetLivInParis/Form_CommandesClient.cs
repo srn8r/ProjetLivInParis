@@ -81,7 +81,9 @@ namespace ProjetLivInParis
 
             ChargerCommandes();
         }
-
+        /// <summary>
+        /// Charge les commandes du client depuis la base de données et les affiche dans la ListView.
+        /// </summary>
         private void ChargerCommandes()
         {
             listCommandes.Items.Clear();
@@ -132,7 +134,11 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors du chargement des commandes : " + ex.Message);
             }
         }
-
+        /// <summary>
+        /// Gère l'événement de clic droit sur la ListView pour afficher le menu contextuel.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ListCommandes_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -145,8 +151,9 @@ namespace ProjetLivInParis
                 }
             }
         }
-
-
+        /// <summary>
+        /// Supprime la commande sélectionnée.
+        /// </summary>
         private void SupprimerCommande()
         {
             if (listCommandes.SelectedItems.Count == 0)
@@ -174,7 +181,6 @@ namespace ProjetLivInParis
                         cmdPlat.ExecuteNonQuery();
                     }
 
-                    // Supprimer la commande
                     string deleteCommande = "DELETE FROM Commande WHERE CommandeID = @CommandeID";
                     using (MySqlCommand cmdCommande = new MySqlCommand(deleteCommande, conn))
                     {
@@ -190,7 +196,9 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors de la suppression : " + ex.Message);
             }
         }
-
+        /// <summary>
+        /// Affiche le trajet entre le cuisinier et le client pour la commande sélectionnée.
+        /// </summary>
         private void VoirTrajet()
         {
             if (listCommandes.SelectedItems.Count == 0)
@@ -234,7 +242,6 @@ namespace ProjetLivInParis
                     return;
                 }
 
-                // Calculer le trajet
                 var graphe = stationManager.ObtenirGraphe();
                 var noeudCuisinier = graphe.Noeuds.FirstOrDefault(n => n.Valeur.Nom == adresseCuisinier);
                 var noeudClient = graphe.Noeuds.FirstOrDefault(n => n.Valeur.Nom == adresseClient);
@@ -252,10 +259,8 @@ namespace ProjetLivInParis
                     return;
                 }
 
-                // Calculer le temps (tu peux affiner si besoin)
                 int tempsTrajet = chemin.Count * 2;
 
-                // Appel de la nouvelle Form_Trajet ✨
                 var formTrajet = new Form_Trajet(chemin, tempsTrajet, $"Trajet de {adresseCuisinier} ➔ {adresseClient}");
                 formTrajet.ShowDialog();
             }
@@ -264,10 +269,14 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors de la récupération du trajet : " + ex.Message);
             }
         }
-
+        /// <summary>
+        /// Gère l'événement de double clic sur la ListView pour afficher le trajet.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ListCommandes_DoubleClick(object sender, EventArgs e)
         {
-            VoirTrajet();  // Double-clic = voir le trajet directement
+            VoirTrajet();
         }
     }
 }

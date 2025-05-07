@@ -2,6 +2,9 @@
 
 namespace Project_LivInParis
 {
+    /// <summary>
+    /// Classe représentant une commande dans le système de gestion de commandes.
+    /// </summary>
     public class Commande
     {
         public int CommandeID { get; set; }

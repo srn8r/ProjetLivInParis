@@ -74,7 +74,9 @@ namespace ProjetLivInParis
 
             ChargerCommandes();
         }
-
+        /// <summary>
+        /// Charge les commandes du cuisinier depuis la base de données et les affiche dans le ListView.
+        /// </summary>
         private void ChargerCommandes()
         {
             lvCommandes.Items.Clear();
@@ -142,7 +144,9 @@ namespace ProjetLivInParis
             ChargerCommandes();
         }
     }
-
+    /// <summary>
+    /// Classe utilitaire pour afficher une boîte de dialogue de saisie de texte.
+    /// </summary>
     public static class Prompt
     {
         public static string ShowDialog(string text, string caption, string defaultValue = "")

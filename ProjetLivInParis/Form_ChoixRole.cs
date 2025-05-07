@@ -44,7 +44,6 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(lblMessage);
 
-            // Bouton Client
             btnClient = new Button
             {
                 Text = "Client",
@@ -58,7 +57,6 @@ namespace ProjetLivInParis
             btnClient.Click += BtnClient_Click;
             this.Controls.Add(btnClient);
 
-            // Bouton Cuisinier
             btnCuisinier = new Button
             {
                 Text = "Cuisinier",
@@ -72,7 +70,6 @@ namespace ProjetLivInParis
             btnCuisinier.Click += BtnCuisinier_Click;
             this.Controls.Add(btnCuisinier);
 
-            // Bouton Les Deux
             btnLesDeux = new Button
             {
                 Text = "Client et Cuisinier",
@@ -86,7 +83,6 @@ namespace ProjetLivInParis
             btnLesDeux.Click += BtnLesDeux_Click;
             this.Controls.Add(btnLesDeux);
 
-            // Bouton Plus Tard
             btnPlusTard = new Button
             {
                 Text = "Choisir plus tard",
@@ -103,7 +99,6 @@ namespace ProjetLivInParis
 
         private void BtnClient_Click(object sender, EventArgs e)
         {
-            // Créer un enregistrement dans la table client
             try
             {
                 string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
@@ -132,7 +127,6 @@ namespace ProjetLivInParis
 
         private void BtnCuisinier_Click(object sender, EventArgs e)
         {
-            // Créer un enregistrement dans la table cuisinier
             try
             {
                 string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
@@ -161,7 +155,6 @@ namespace ProjetLivInParis
 
         private void BtnLesDeux_Click(object sender, EventArgs e)
         {
-            // Créer des enregistrements dans les tables client et cuisinier
             try
             {
                 string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
@@ -169,7 +162,6 @@ namespace ProjetLivInParis
                 {
                     conn.Open();
 
-                    // Ajouter en tant que client
                     string insertClientQuery = "INSERT INTO client (ID, TypeClient) VALUES (@ID, 'Particulier')";
                     using (MySqlCommand insertCmd = new MySqlCommand(insertClientQuery, conn))
                     {
@@ -177,7 +169,6 @@ namespace ProjetLivInParis
                         insertCmd.ExecuteNonQuery();
                     }
 
-                    // Ajouter en tant que cuisinier
                     string insertCuisinierQuery = "INSERT INTO cuisinier (ID) VALUES (@ID)";
                     using (MySqlCommand insertCmd = new MySqlCommand(insertCuisinierQuery, conn))
                     {

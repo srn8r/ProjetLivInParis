@@ -33,6 +33,9 @@ namespace ProjetLivInParis
         #endregion
 
         #region structure 
+        /// <summary>
+        /// Initialise les composants de l'interface utilisateur.
+        /// </summary>
         private void InitialiserUI()
         {
             lblBienvenue = new Label
@@ -189,7 +192,13 @@ namespace ProjetLivInParis
             };
             grpGestion.Controls.Add(btnVoirCommandes);
         }
-
+        /// <summary>
+        /// Crée un label avec le texte spécifié, la position et la taille.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="top"></param>
+        /// <param name="left"></param>
+        /// <returns></returns>
         private Label CreateLabel(string text, int top, int left)
         {
             return new Label
@@ -202,7 +211,13 @@ namespace ProjetLivInParis
                 Font = new Font("Segoe UI", 10, FontStyle.Bold)
             };
         }
-
+        /// <summary>
+        /// Crée une zone de texte avec la position et la taille spécifiées.
+        /// </summary>
+        /// <param name="top"></param>
+        /// <param name="left"></param>
+        /// <param name="width"></param>
+        /// <returns></returns>
         private TextBox CreateTextBox(int top, int left, int width)
         {
             return new TextBox
@@ -212,7 +227,9 @@ namespace ProjetLivInParis
                 Width = width
             };
         }
-
+        /// <summary>
+        /// Récupère le prénom du cuisinier à partir de la base de données.
+        /// </summary>
         private void ChargerPrenomCuisinier()
         {
             try
@@ -277,12 +294,12 @@ namespace ProjetLivInParis
                         int rows = cmd.ExecuteNonQuery();
                         if (rows > 0)
                         {
-                            MessageBox.Show($"✅ Le plat '{nomPlat}' a été ajouté avec succès !", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            MessageBox.Show($"Le plat '{nomPlat}' a été ajouté avec succès !", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             ResetForm();
                         }
                         else
                         {
-                            MessageBox.Show("❌ L'ajout a échoué.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("L'ajout a échoué.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                 }
@@ -330,15 +347,17 @@ namespace ProjetLivInParis
             }
             return true;
         }
-
+        /// <summary>
+        /// Réinitialise le formulaire après l'ajout d'un plat.
+        /// </summary>
         private void ResetForm()
         {
             txtNomPlat.Clear();
             numQuantite.Value = 1;
             dpFabrication.Value = DateTime.Now;
-            dpPeremption.Value = DateTime.Now.AddDays(1);  // ➔ Remet à demain
+            dpPeremption.Value = DateTime.Now.AddDays(1);
             numPrix.Value = numPrix.Minimum;
-            txtRegime.Text = "Standard";  // ➔ Remet à Standard
+            txtRegime.Text = "Standard";
             txtNomPlat.Focus();
         }
 

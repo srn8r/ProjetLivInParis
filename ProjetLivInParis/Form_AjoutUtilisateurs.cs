@@ -147,6 +147,9 @@ namespace ProjetLivInParis
         #endregion
 
         #region méthodes
+        /// <summary>
+        /// Charge les stations de métro dans le ComboBox cbAdresse.
+        /// </summary>
         private void ChargerStationsMetro()
         {
             var graphe = stationManager.ObtenirGraphe();
@@ -162,7 +165,11 @@ namespace ProjetLivInParis
             if (cbAdresse.Items.Count > 0)
                 cbAdresse.SelectedIndex = 0;
         }
-
+        /// <summary>
+        /// Gère le changement d'état des boutons radio pour afficher ou masquer les contrôles spécifiques au client.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void RbClient_CheckedChanged(object sender, EventArgs e)
         {
             bool showClientControls = rbClient.Checked || rbClientEtCuisinier.Checked;
@@ -174,7 +181,11 @@ namespace ProjetLivInParis
                 CbTypeClient_SelectedIndexChanged(null, null);
             }
         }
-
+        /// <summary>
+        /// Gère le changement de type de client pour activer ou désactiver les champs spécifiques.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CbTypeClient_SelectedIndexChanged(object sender, EventArgs e)
         {
             bool isEntreprise = cbTypeClient.SelectedItem?.ToString() == "Entreprise";

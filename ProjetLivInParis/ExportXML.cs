@@ -24,6 +24,9 @@ namespace ProjetLivInParis
         #endregion
 
         #region méthodes
+        /// <summary>
+        /// Importe les données de la base de données vers un fichier XML.
+        /// </summary>
         public void ImportDataToXml()
         {
             XmlDocument xmlDoc = new XmlDocument();

@@ -61,7 +61,9 @@ namespace ProjetLivInParis
 
             ChargerPlats();
         }
-
+        /// <summary>
+        /// Charge les plats du cuisinier depuis la base de données et les affiche dans la ListView.
+        /// </summary>
         private void ChargerPlats()
         {
             lvPlats.Items.Clear();

@@ -20,6 +20,9 @@ namespace TestLinInParis
         #endregion
 
         #region constructeur
+        /// <summary>
+        /// Constructeur de la classe Form_Accueil.
+        /// </summary>
         public Form_Accueil()
         {
             InitializeComponent();
@@ -67,7 +70,6 @@ namespace TestLinInParis
             this.Controls.Add(btnAdmin);
             btnAdmin.BringToFront();
 
-            // Bouton Utilisateur
             btnUtilisateur = new Button
             {
                 Text = "Utilisateur",
@@ -85,6 +87,11 @@ namespace TestLinInParis
         #endregion
 
         #region resize
+        /// <summary>
+        /// Gère l'événement Resize du formulaire.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FormAccueil_Resize(object sender, EventArgs e)
         {
             lblTitre.Location = new Point((this.ClientSize.Width - lblTitre.Width) / 2, 100);

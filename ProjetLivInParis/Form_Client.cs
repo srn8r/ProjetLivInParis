@@ -132,7 +132,9 @@ namespace ProjetLivInParis
             ChargerInfosClient();
             ChargerPlatsDisponibles();
         }
-
+        /// <summary>
+        /// Charge les informations du client depuis la base de données.
+        /// </summary>
         private void ChargerInfosClient()
         {
             using (var conn = new MySqlConnection(connectionString))
@@ -153,7 +155,9 @@ namespace ProjetLivInParis
             }
             lblBienvenue.Text = $"Bienvenue {prenomClient}";
         }
-
+        /// <summary>
+        /// Charge les plats disponibles depuis la base de données et les affiche dans la liste.
+        /// </summary>
         private void ChargerPlatsDisponibles()
         {
             informationsPlats.Clear();
@@ -238,8 +242,10 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors du chargement des plats : " + ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
+        /// <summary>
+        /// Affiche les détails d'un plat dans une nouvelle fenêtre.
+        /// </summary>
+        /// <param name="platNom"></param>
         private void AfficherDetailsPlat(string platNom)
         {
             if (informationsPlats.TryGetValue(platNom, out PlatInfo infos))
@@ -296,7 +302,13 @@ namespace ProjetLivInParis
                 detailsForm.ShowDialog();
             }
         }
-
+        /// <summary>
+        /// Ajoute une ligne de détails dans le tableau.
+        /// </summary>
+        /// <param name="layout"></param>
+        /// <param name="row"></param>
+        /// <param name="label"></param>
+        /// <param name="value"></param>
         private void AddDetailRow(TableLayoutPanel layout, int row, string label, string value)
         {
             layout.Controls.Add(new Label
@@ -320,7 +332,10 @@ namespace ProjetLivInParis
             Form_CommandesClient formCmd = new Form_CommandesClient(userId);
             formCmd.ShowDialog();
         }
-
+        /// <summary>
+        /// Affiche le trajet entre le cuisinier et le client dans une nouvelle fenêtre.
+        /// </summary>
+        /// <param name="platNom"></param>
         private void AfficherTrajet(string platNom)
         {
             if (!informationsPlats.TryGetValue(platNom, out PlatInfo infos) || infos.Chemin == null || infos.Chemin.Count == 0)
@@ -334,7 +349,12 @@ namespace ProjetLivInParis
             formTrajet.ShowDialog();
         }
 
-
+        /// <summary>
+        /// Calculer le trajet entre la station du cuisinier et celle du client.
+        /// </summary>
+        /// <param name="stationCuisinierNom"></param>
+        /// <param name="stationClientNom"></param>
+        /// <returns></returns>
         private (int tempsTrajet, List<Noeud<Station>> chemin) CalculerTrajet(string stationCuisinierNom, string stationClientNom)
         {
             var graphe = stationManager.ObtenirGraphe();
@@ -348,7 +368,6 @@ namespace ProjetLivInParis
 
                 if (chemin != null && chemin.Count > 0)
                 {
-                    // Calculer le temps total du trajet
                     double tempsTotal = 0;
                     for (int i = 0; i < chemin.Count - 1; i++)
                     {
@@ -365,7 +384,11 @@ namespace ProjetLivInParis
 
             return (new Random().Next(15, 45), new List<Noeud<Station>>()); 
         }
-
+        /// <summary>
+        /// Gère l'événement de clic sur le bouton "Commander". Enregistre la commande dans la base de données.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnCommander_Click(object sender, EventArgs e)
         {
             if (listPlats.SelectedItems.Count == 0)
@@ -383,11 +406,10 @@ namespace ProjetLivInParis
             }
 
             bool adresseOk = false;
-            string clientAdresseActuelle = infos.ClientAdresse; // Adresse initiale (dans infos)
+            string clientAdresseActuelle = infos.ClientAdresse;
 
             var graphe = stationManager.ObtenirGraphe();
 
-            // 👌 Maintenant on est sûr que l'adresse est bonne ➔ passer la commande
             try
             {
                 using (MySqlConnection conn = new MySqlConnection(connectionString))
@@ -397,7 +419,6 @@ namespace ProjetLivInParis
                     {
                         try
                         {
-                            // 1. Insérer la commande
                             string insertCmd = @"INSERT INTO Commande (DateCommande, AdresseLivraison, PrixTotal, Statut, ModePaiement, ClientID)
                                         VALUES (NOW(), @AdresseLivraison, @PrixTotal, 'En cours', 'En attente', @ClientID)";
 
@@ -415,7 +436,6 @@ namespace ProjetLivInParis
 
                                 long commandeId = cmd.LastInsertedId;
 
-                                // 2. Créer un nouveau plat pour la commande avec quantité=1
                                 string insertPlatCommande = @"INSERT INTO Plat (Nom, Quantite, date_de_fabrication, Date_de_peremption, Prix, Regime, CuisinierID, CommandeID)
                                                     SELECT Nom, 1, date_de_fabrication, Date_de_peremption, Prix, Regime, CuisinierID, @CommandeID
                                                     FROM Plat WHERE PlatID = @PlatID";
@@ -427,7 +447,6 @@ namespace ProjetLivInParis
                                     cmdInsertPlat.ExecuteNonQuery();
                                 }
 
-                                // 3. Mettre à jour la quantité du plat original
                                 string updatePlat = @"UPDATE Plat SET Quantite = Quantite - 1 WHERE PlatID = @PlatID";
                                 using (MySqlCommand cmdUpdate = new MySqlCommand(updatePlat, conn, transaction))
                                 {
@@ -435,23 +454,20 @@ namespace ProjetLivInParis
                                     cmdUpdate.ExecuteNonQuery();
                                 }
 
-                                // 4. Supprimer les plats avec quantité 0
                                 string deletePlatZeroQuantity = @"DELETE FROM Plat WHERE Quantite <= 0 AND CommandeID IS NULL";
                                 using (MySqlCommand cmdDelete = new MySqlCommand(deletePlatZeroQuantity, conn, transaction))
                                 {
                                     cmdDelete.ExecuteNonQuery();
                                 }
 
-                                // Valider la transaction
                                 transaction.Commit();
 
                                 MessageBox.Show($"Commande enregistrée pour le plat : {platNom}\nTemps de livraison estimé : {infos.TempsTrajet} minutes",
                                     "Commande réussie", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                                // Rafraîchir la liste des plats
                                 listPlats.Items.Clear();
-                                informationsPlats.Clear();  // Très important aussi pour ne pas garder l'ancien dictionnaire
-                                ChargerPlatsDisponibles();  // Recharge la liste proprement !
+                                informationsPlats.Clear();
+                                ChargerPlatsDisponibles();
 
                                 if (listPlats.Items.Count == 0)
                                 {
@@ -463,7 +479,6 @@ namespace ProjetLivInParis
                         }
                         catch (Exception ex)
                         {
-                            // En cas d'erreur, annuler la transaction
                             transaction.Rollback();
                             throw new Exception("Erreur lors de la transaction : " + ex.Message);
                         }
@@ -475,6 +490,11 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors de la commande : " + ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        /// <summary>
+        /// Gère l'événement de clic sur le ListView des plats. Affiche le trajet entre le cuisinier et le client.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ListPlats_Click(object sender, EventArgs e)
         {
             if (listPlats.SelectedItems.Count > 0)
@@ -489,7 +509,11 @@ namespace ProjetLivInParis
                 }
             }
         }
-
+        /// <summary>
+        /// Gère l'événement de double-clic sur le ListView des plats. Affiche les détails du plat sélectionné.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ListPlats_DoubleClick(object sender, EventArgs e)
         {
             if (listPlats.SelectedItems.Count > 0)
@@ -498,7 +522,11 @@ namespace ProjetLivInParis
                 AfficherDetailsPlat(platNom);
             }
         }
-
+        /// <summary>
+        /// Gère l'événement de clic sur le bouton "Voir détails". Affiche les détails du plat sélectionné.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnVoirDetails_Click(object sender, EventArgs e)
         {
             if (listPlats.SelectedItems.Count == 0)

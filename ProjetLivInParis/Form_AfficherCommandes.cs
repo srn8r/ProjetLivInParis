@@ -33,6 +33,9 @@ namespace ProjetLivInParis
         #endregion
 
         #region structure
+        /// <summary>
+        /// Initialise les composants de l'interface utilisateur.
+        /// </summary>
         private void InitialiserComposants()
         {
             lblTitre = new Label
@@ -104,6 +107,9 @@ namespace ProjetLivInParis
         #endregion
 
         #region méthodes
+        /// <summary>
+        /// Charges les commandes depuis la base de données et les affiche dans le ListView.
+        /// </summary>
         private void ChargerCommandes()
         {
             try
@@ -138,7 +144,11 @@ namespace ProjetLivInParis
                     "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
+        /// <summary>
+        /// Gère l'événement de clic sur le bouton "Supprimer". Supprime la commande sélectionnée.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnSupprimer_Click(object sender, EventArgs e)
         {
             if (lvCommandes.SelectedItems.Count == 0)
@@ -185,6 +195,11 @@ namespace ProjetLivInParis
                 }
             }
         }
+        /// <summary>
+        /// Permet de supprimer toutes les commandes de la base de données après confirmation de l'utilisateur.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnEffacerTout_Click(object sender, EventArgs e)
         {
             if (lvCommandes.Items.Count == 0)

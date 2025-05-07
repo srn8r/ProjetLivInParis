@@ -88,6 +88,11 @@ namespace Project_LivInParis
 
             return utilisateurs;
         }
+        /// <summary>
+        /// Récupère tous les clients de la base de données.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public List<Client> RecupererClients()
         {
             List<Client> clients = new List<Client>();
@@ -171,6 +176,10 @@ namespace Project_LivInParis
 
             return cuisiniers;
         }
+        /// <summary>
+        /// Récupère toutes les commandes de la base de données.
+        /// </summary>
+        /// <returns></returns>
         public List<Commande> RecupererToutesLesCommandes()
         {
             List<Commande> commandes = new List<Commande>();

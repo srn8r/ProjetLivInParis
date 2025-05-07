@@ -21,6 +21,9 @@ namespace ProjetLivInParis
         #endregion
 
         #region constructeur
+        /// <summary>
+        /// Constructeur de la classe Form_Admin.
+        /// </summary>
         public Form_Admin()
         {
             InitializeComponent();
@@ -129,6 +132,11 @@ namespace ProjetLivInParis
         #endregion
 
         #region resize
+        /// <summary>
+        /// Redimensionne les composants de la fenêtre lorsque la taille de la fenêtre change.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FormAdmin_Resize(object sender, EventArgs e)
         {
             lblTitre.Location = new Point((this.ClientSize.Width - lblTitre.Width) / 2, 40);

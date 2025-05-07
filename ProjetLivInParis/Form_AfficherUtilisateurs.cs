@@ -124,6 +124,15 @@ namespace ProjetLivInParis
             btnSupprimer.Click += BtnSupprimer_Click;
             this.Controls.Add(btnSupprimer);
         }
+        /// <summary>
+        /// Crée un champ de texte avec une étiquette.
+        /// </summary>
+        /// <param name="labelText"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="labelWidth"></param>
+        /// <param name="tbWidth"></param>
+        /// <returns></returns>
         private TextBox CreateField(string labelText, int x, int y, int labelWidth, int tbWidth)
         {
             Label lbl = new Label
@@ -145,6 +154,10 @@ namespace ProjetLivInParis
         #endregion
 
         #region méthodes
+        /// <summary>
+        /// Charge les utilisateurs dans la ListView.
+        /// </summary>
+        /// <param name="filtre"></param>
         private void ChargerUtilisateurs(string filtre = "Tous")
         {
             try
@@ -184,12 +197,20 @@ namespace ProjetLivInParis
                     "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
+        /// <summary>
+        /// Gère l'événement de changement de sélection dans le ComboBox de filtre. Recharge les utilisateurs en fonction du filtre sélectionné.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CbFiltre_SelectedIndexChanged(object sender, EventArgs e)
         {
             ChargerUtilisateurs(cbFiltre.SelectedItem.ToString());
         }
-
+        /// <summary>
+        /// Gère l'événement de changement de sélection dans la ListView. Remplit les champs de texte avec les informations de l'utilisateur sélectionné.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void LvUtilisateurs_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lvUtilisateurs.SelectedItems.Count == 0)
@@ -211,7 +232,11 @@ namespace ProjetLivInParis
             txtAdresse.Text = item.SubItems[5].Text;
             txtMdp.Text = item.SubItems[7].Text;
         }
-
+        /// <summary>
+        /// Gère l'événement de clic sur le bouton "Supprimer". Supprime l'utilisateur sélectionné.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnSupprimer_Click(object sender, EventArgs e)
         {
             if (lvUtilisateurs.SelectedItems.Count == 0)
@@ -258,7 +283,11 @@ namespace ProjetLivInParis
                 }
             }
         }
-
+        /// <summary>
+        /// Gère l'événement de clic sur le bouton "Enregistrer". Met à jour les informations de l'utilisateur sélectionné.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnEnregistrer_Click(object sender, EventArgs e)
         {
             if (lvUtilisateurs.SelectedItems.Count == 0)

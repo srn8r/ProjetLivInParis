@@ -15,7 +15,10 @@ namespace ProjetLivInParis
     {
         private GrapheCommandes graphe;
         private Dictionary<int, Color> paletteCouleurs = new();
-
+        /// <summary>
+        /// Constructeur de la classe Form_ColorationGraphe.
+        /// </summary>
+        /// <param name="g"></param>
         public Form_ColorationGraphe(GrapheCommandes g)
         {
             InitializeComponent();
@@ -24,7 +27,6 @@ namespace ProjetLivInParis
             this.Size = new Size(900, 700);
             this.DoubleBuffered = true;
 
-            // Génère des couleurs aléatoires pour chaque couleur utilisée
             var couleurs = new[]
             {
             Color.Red, Color.Green, Color.Blue, Color.Orange,
@@ -37,7 +39,11 @@ namespace ProjetLivInParis
 
             this.Paint += Form_ColorationGraph_Paint;
         }
-
+        /// <summary>
+        /// Gère l'événement Paint de la fenêtre pour dessiner le graphe coloré.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form_ColorationGraph_Paint(object sender, PaintEventArgs e)
         {
             var g = e.Graphics;
@@ -48,7 +54,6 @@ namespace ProjetLivInParis
             int rayonCercle = 250;
             Point centre = new Point(this.ClientSize.Width / 2, this.ClientSize.Height / 2);
 
-            // Positionner les sommets en cercle
             Dictionary<Sommet, PointF> positions = new();
             for (int i = 0; i < nbSommets; i++)
             {
@@ -58,7 +63,6 @@ namespace ProjetLivInParis
                 positions[graphe.Sommets[i]] = new PointF(x, y);
             }
 
-            // 1️⃣ Dessiner les arêtes
             foreach (var arete in graphe.Aretes)
             {
                 var p1 = positions[arete.Source];
@@ -66,7 +70,6 @@ namespace ProjetLivInParis
                 g.DrawLine(Pens.Gray, p1, p2);
             }
 
-            // 2️⃣ Dessiner les sommets
             foreach (var sommet in graphe.Sommets)
             {
                 var pos = positions[sommet];
