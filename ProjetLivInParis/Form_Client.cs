@@ -46,19 +46,7 @@ namespace ProjetLivInParis
         }
 
         public Form_Client(int id)
-        {
-            /*InitializeComponent();
-            this.Text = "Espace Client";
-            this.Size = new Size(750, 500);
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.BackColor = Color.LightSteelBlue;
-            userId = id;
-
-            stationManager = new StationManager(connectionString);
-            stationManager.ChargerStationsDepuisBDD();
-            stationManager.LierCorrespondances();*/
-
-            
+        {            
             InitializeComponent();
             userId = id;
 
