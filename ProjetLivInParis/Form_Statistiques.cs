@@ -97,20 +97,6 @@ namespace ProjetLivInParis
                 {
                     lstStats.Items.Add("Tous les plats ont été commandés au moins une fois.");
                 }
-                lstStats.Items.Add(new string('-', 80));
-
-                var clientsMoy = db.GetClientsSuperieursMoyenne();
-                if (clientsMoy.Count > 0)
-                {
-                    lstStats.Items.Add("Clients au-dessus de la moyenne:");
-                    foreach (var c in clientsMoy)
-                        lstStats.Items.Add($"- {c.Nom} {c.Prenom} (ID: {c.ClientID})");
-                }
-                else
-                {
-                    lstStats.Items.Add("Aucun client au-dessus de la moyenne trouvée.");
-                }
-
             }
             catch (Exception ex)
             {

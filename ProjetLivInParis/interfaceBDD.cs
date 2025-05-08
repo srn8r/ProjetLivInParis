@@ -507,55 +507,19 @@ namespace Project_LivInParis
             var result = new List<string>();
             Connexion();
             string query = @"
-        SELECT p.Nom
-        FROM Plat p
-        LEFT JOIN Commande c ON p.CommandeID = c.CommandeID
-        WHERE c.CommandeID IS NULL;";
+            SELECT DISTINCT p.Nom
+            FROM Plat p
+            WHERE p.Nom NOT IN (
+                SELECT DISTINCT p2.Nom 
+                FROM Plat p2 
+                WHERE p2.CommandeID IS NOT NULL
+            );";
             using (var cmd = new MySqlCommand(query, connexion))
             using (var reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
                     result.Add(reader.GetString("Nom"));
-                }
-            }
-            FermerConnexion();
-            return result;
-        }
-
-        /// <summary>
-        /// Clients dont le nombre de commandes est supérieur à la moyenne (ALL + sous-requête)
-        /// </summary>
-        public List<(int ClientID, string Nom, string Prenom)> GetClientsSuperieursMoyenne()
-        {
-            var result = new List<(int, string, string)>();
-            Connexion();
-            string query = @"
-        SELECT i.ID, i.Nom, i.Prenom
-        FROM Identite i
-        WHERE i.ID IN (
-            SELECT c.ClientID
-            FROM Commande c
-            GROUP BY c.ClientID
-            HAVING COUNT(*) > ALL (
-                SELECT AVG(nb)
-                FROM (
-                    SELECT COUNT(*) AS nb
-                    FROM Commande
-                    GROUP BY ClientID
-                ) AS moyennes
-            )
-        );";
-            using (var cmd = new MySqlCommand(query, connexion))
-            using (var reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    result.Add((
-                        reader.GetInt32("ID"),
-                        reader.GetString("Nom"),
-                        reader.GetString("Prenom")
-                    ));
                 }
             }
             FermerConnexion();
