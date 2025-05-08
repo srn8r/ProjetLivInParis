@@ -55,7 +55,6 @@ namespace Project_LivInParis
                     Utilisateur utilisateur;
                     string type = reader.GetString("type");
 
-                    // Créer le bon type d'utilisateur selon le type récupéré
                     if (type == "Client")
                     {
                         utilisateur = new Client();
@@ -69,7 +68,6 @@ namespace Project_LivInParis
                         utilisateur = new Utilisateur();
                     }
 
-                    // Remplir les propriétés communes
                     utilisateur.ID = reader.GetInt32("id");
                     utilisateur.Nom = reader.GetString("nom");
                     utilisateur.Prenom = reader.GetString("prenom");
@@ -178,11 +176,11 @@ namespace Project_LivInParis
             List<Commande> commandes = new List<Commande>();
 
             string query = @"
-        SELECT c.CommandeID, c.DateCommande, c.AdresseLivraison, c.PrixTotal, c.Statut, 
-               c.ModePaiement, i.ID AS ClientID, i.Nom AS ClientNom, i.Prenom AS ClientPrenom, p.Nom AS NomPlat
-        FROM Commande c
-        JOIN Identite i ON c.ClientID = i.ID
-        JOIN Plat p ON p.CommandeID = c.CommandeID";
+                            SELECT c.CommandeID, c.DateCommande, c.AdresseLivraison, c.PrixTotal, c.Statut, 
+                                   c.ModePaiement, i.ID AS ClientID, i.Nom AS ClientNom, i.Prenom AS ClientPrenom, p.Nom AS NomPlat
+                            FROM Commande c
+                            JOIN Identite i ON c.ClientID = i.ID
+                            JOIN Plat p ON p.CommandeID = c.CommandeID";
 
             using (MySqlCommand cmd = new MySqlCommand(query, connexion))
             using (MySqlDataReader reader = cmd.ExecuteReader())
@@ -332,21 +330,18 @@ namespace Project_LivInParis
         {
             try
             {
-                // D'abord supprimer tous les plats liés aux commandes
                 string deletePlatsQuery = "DELETE FROM Plat";
                 using (MySqlCommand cmdPlats = new MySqlCommand(deletePlatsQuery, connexion))
                 {
                     cmdPlats.ExecuteNonQuery();
                 }
 
-                // Ensuite supprimer toutes les commandes
                 string deleteCommandeQuery = "DELETE FROM Commande";
                 using (MySqlCommand cmdCmd = new MySqlCommand(deleteCommandeQuery, connexion))
                 {
                     cmdCmd.ExecuteNonQuery();
                 }
 
-                // Réinitialiser les auto-increments
                 string resetCommandeAutoIncrement = "ALTER TABLE Commande AUTO_INCREMENT = 1";
                 using (MySqlCommand cmdResetCmd = new MySqlCommand(resetCommandeAutoIncrement, connexion))
                 {
