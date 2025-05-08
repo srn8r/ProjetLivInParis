@@ -40,12 +40,12 @@ namespace ProjetLivInParis
             { "1", Color.Gold },
             { "2", Color.Blue },
             { "3", Color.Brown },
-            { "3bis", Color.LightSkyBlue }, // Ajouté : 3bis
+            { "3bis", Color.LightSkyBlue },
             { "4", Color.Purple },
             { "5", Color.Orange },
             { "6", Color.LightGreen },
             { "7", Color.Pink },
-            { "7bis", Color.LightPink }, // Ajouté : 7bis
+            { "7bis", Color.LightPink },
             { "8", Color.Gray },
             { "9", Color.Olive },
             { "10", Color.DarkGoldenrod },
@@ -209,6 +209,11 @@ namespace ProjetLivInParis
         #endregion
 
         #region import
+        /// <summary>
+        /// Chargement du graphe depuis la base de données et initialisation des stations.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FormGraphe_Load(object sender, EventArgs e)
         {
             string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
@@ -232,6 +237,11 @@ namespace ProjetLivInParis
         #endregion
 
         #region tracé graphe
+        /// <summary>
+        /// Dessine le graphe sur le panneau.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
             if (graphe == null) return;
@@ -240,7 +250,6 @@ namespace ProjetLivInParis
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             Font font = new Font(this.Font.FontFamily, 9);
 
-            // Dessin des lignes
             foreach (var lien in graphe.Liens)
             {
                 string ligne = lien.Source.Valeur.Ligne.ToString();
@@ -253,7 +262,6 @@ namespace ProjetLivInParis
                 g.DrawLine(penLigne, p1, p2);
             }
 
-            // Chemin le plus court
             if (chemin.Count > 1)
             {
                 
@@ -265,7 +273,7 @@ namespace ProjetLivInParis
 
                     var ligne = actuel.Valeur.Ligne.ToString();
                     if (!couleursParLigne.TryGetValue(ligne, out Color couleur))
-                        couleur = Color.Red; // couleur par défaut si ligne inconnue
+                        couleur = Color.Red;
 
                     using Pen penCheminLigne = new Pen(couleur, 8);
                     var p1 = ConvertirCoordonnees(actuel.Valeur.Longitude, actuel.Valeur.Latitude);
@@ -281,7 +289,6 @@ namespace ProjetLivInParis
                     font, Brushes.Black, 10, 10);
             }
 
-            // Dessin des stations
             foreach (var noeud in graphe.Noeuds)
             {
                 var station = noeud.Valeur;
@@ -330,7 +337,6 @@ namespace ProjetLivInParis
                 var courant = chemin[i - 1];
                 var suivant = chemin[i];
 
-                // Si on change de ligne OU si on arrive au dernier arrêt
                 bool ligneChange = suivant.Valeur.Ligne != ligneActuelle;
                 bool dernierSegment = i == chemin.Count - 1;
 
@@ -338,7 +344,6 @@ namespace ProjetLivInParis
                 {
                     string destination = suivant.Valeur.Nom;
 
-                    // ⚠️ Évite de créer des segments où départ == arrivée (cas des doubles)
                     if (depart != destination)
                     {
                         lignesDetaillees.Add($"Ligne {ligneActuelle} : {depart} -> {destination}");

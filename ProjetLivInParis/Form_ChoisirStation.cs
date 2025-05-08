@@ -70,20 +70,30 @@ namespace ProjetLivInParis
         #endregion
 
         #region méthodes
+        /// <summary>
+        /// Gère l'événement TextChanged du TextBox de recherche.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TxtRecherche_TextChanged(object sender, EventArgs e)
         {
             string recherche = txtRecherche.Text.ToLower();
             var filtres = toutesStations.Where(s => s.ToLower().Contains(recherche)).ToList();
             RafraichirListe(filtres);
         }
-
+        /// <summary>
+        /// Met à jour la liste des stations affichées dans le ListBox.
+        /// </summary>
+        /// <param name="stations"></param>
         private void RafraichirListe(List<string> stations)
         {
             lstStations.Items.Clear();
             foreach (var s in stations)
                 lstStations.Items.Add(s);
         }
-
+        /// <summary>
+        /// Valide le choix de la station sélectionnée dans le ListBox.
+        /// </summary>
         private void ValiderChoix()
         {
             if (lstStations.SelectedItem != null)

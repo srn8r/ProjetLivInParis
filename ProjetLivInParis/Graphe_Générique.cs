@@ -22,13 +22,25 @@ namespace Project_LivInParis
         #endregion
 
         #region Ajout de nœud & lien
+        /// <summary>
+        /// Ajoute un nœud au graphe avec un identifiant et une valeur spécifiés.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="valeur"></param>
+        /// <returns></returns>
         public Noeud<T> AjouterNoeud(int id, T valeur)
         {
             var noeud = new Noeud<T>(id, valeur);
             Noeuds.Add(noeud);
             return noeud;
         }
-
+        /// <summary>
+        /// Ajoute un lien entre deux nœuds. Si le lien existe déjà, il ne sera pas ajouté à nouveau.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
+        /// <param name="poids"></param>
+        /// <param name="bidirectionnel"></param>
         public void AjouterLien(Noeud<T> source, Noeud<T> destination, double poids, bool bidirectionnel = false)
         {
             if (!LienExiste(source, destination))
@@ -45,7 +57,12 @@ namespace Project_LivInParis
                 Liens.Add(lienInverse);
             }
         }
-
+        /// <summary>
+        /// Vérifie si un lien existe entre deux nœuds.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
+        /// <returns></returns>
         private bool LienExiste(Noeud<T> source, Noeud<T> destination)
         {
             foreach (var lien in source.LiensSortants)

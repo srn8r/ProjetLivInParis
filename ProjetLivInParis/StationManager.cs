@@ -24,6 +24,9 @@ namespace Project_LivInParis
         #endregion
 
         #region méthodes chargement de données
+        /// <summary>
+        /// Charge les stations depuis la base de données et les ajoute au graphe.
+        /// </summary>
         public void ChargerStationsDepuisBDD()
         {
             try
@@ -94,7 +97,9 @@ namespace Project_LivInParis
                 maConnexion.Close();
             }
         }
-
+        /// <summary>
+        /// Lier les stations ayant le même nom pour les correspondances.
+        /// </summary>
         public void LierCorrespondances()
         {
             foreach (var correspondance in correspondances)
@@ -121,7 +126,9 @@ namespace Project_LivInParis
         {
             return graphe;
         }
-
+        /// <summary>
+        /// Affiche le graphe des stations et leurs connexions.
+        /// </summary>
         public void AfficherGraphe()
         {
             foreach (var noeud in graphe.Noeuds)

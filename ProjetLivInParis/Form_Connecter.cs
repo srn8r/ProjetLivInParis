@@ -28,7 +28,6 @@ namespace ProjetLivInParis
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.MediumPurple;
 
-            // Titre
             lblTitre = new Label
             {
                 Text = "Connexion",
@@ -39,7 +38,6 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(lblTitre);
 
-            // Email
             txtEmail = new TextBox
             {
                 PlaceholderText = "Email",
@@ -48,7 +46,6 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(txtEmail);
 
-            // Mot de passe
             txtPassword = new TextBox
             {
                 PlaceholderText = "Mot de passe",
@@ -58,7 +55,6 @@ namespace ProjetLivInParis
             };
             this.Controls.Add(txtPassword);
 
-            // Bouton connexion
             btnConnexion = new Button
             {
                 Text = "Se connecter",
@@ -114,9 +110,8 @@ namespace ProjetLivInParis
                                 int userId = reader.GetInt32("ID");
                                 string prenom = reader.GetString("Prenom");
 
-                                reader.Close(); // fermer avant les autres requêtes
+                                reader.Close();
 
-                                // Vérifier s'il est client
                                 bool estClient = false;
                                 string queryClient = "SELECT COUNT(*) FROM client WHERE ID = @ID";
                                 using (MySqlCommand cmdClient = new MySqlCommand(queryClient, conn))
@@ -125,7 +120,6 @@ namespace ProjetLivInParis
                                     estClient = Convert.ToInt32(cmdClient.ExecuteScalar()) > 0;
                                 }
 
-                                // Vérifier s'il est cuisinier
                                 bool estCuisinier = false;
                                 string queryCuisinier = "SELECT COUNT(*) FROM cuisinier WHERE ID = @ID";
                                 using (MySqlCommand cmdCuisinier = new MySqlCommand(queryCuisinier, conn))
@@ -134,7 +128,6 @@ namespace ProjetLivInParis
                                     estCuisinier = Convert.ToInt32(cmdCuisinier.ExecuteScalar()) > 0;
                                 }
 
-                                // Diriger vers la bonne Form
                                 if (estClient && estCuisinier)
                                 {
                                     MessageBox.Show($"Bienvenue {prenom} ! Vous êtes client et cuisinier.");
@@ -172,7 +165,11 @@ namespace ProjetLivInParis
                 MessageBox.Show("Erreur lors de la connexion à la base de données : " + ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
+        /// <summary>
+        /// Gère l'événement de changement d'état de la case à cocher pour afficher ou masquer le mot de passe.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CbAfficherMotDePasse_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox checkBox = sender as CheckBox;

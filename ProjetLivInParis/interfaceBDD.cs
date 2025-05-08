@@ -88,6 +88,11 @@ namespace Project_LivInParis
 
             return utilisateurs;
         }
+        /// <summary>
+        /// Récupère tous les clients de la base de données.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public List<Client> RecupererClients()
         {
             List<Client> clients = new List<Client>();
@@ -171,6 +176,10 @@ namespace Project_LivInParis
 
             return cuisiniers;
         }
+        /// <summary>
+        /// Récupère toutes les commandes de la base de données.
+        /// </summary>
+        /// <returns></returns>
         public List<Commande> RecupererToutesLesCommandes()
         {
             List<Commande> commandes = new List<Commande>();
@@ -197,7 +206,8 @@ namespace Project_LivInParis
                         ModePaiement = reader.GetString("ModePaiement"),
                         ClientID = reader.GetInt32("ClientID"),
                         ClientNom = reader.GetString("ClientNom"),
-                        ClientPrenom = reader.GetString("ClientPrenom")
+                        ClientPrenom = reader.GetString("ClientPrenom"),
+                        NomPlat = reader.GetString("NomPlat")
                     };
 
                     commandes.Add(commande);
@@ -260,8 +270,6 @@ namespace Project_LivInParis
             cmd.ExecuteNonQuery();
         }
         #endregion
-
-        #region supprimer données BDD depuis visual studio
 
         #region supprimer des utilisateur BDD depuis visual studio
         public bool SupprimerUtilisateur(int idUtilisateur)
@@ -363,8 +371,6 @@ namespace Project_LivInParis
         }
         #endregion
 
-        #endregion
-
         #region afficher et modifier informations utilisateurs
 
         public void AfficherUtilisateurs()
@@ -416,6 +422,164 @@ namespace Project_LivInParis
             }
         }
         #endregion
+
+        #region Statistiques avancées
+
+        /// <summary>
+        /// Récupère les statistiques globales : total utilisateurs, clients, cuisiniers, commandes, plat le plus commandé.
+        /// </summary>
+        public (int TotalUtilisateurs, int TotalClients, int TotalCuisiniers, int TotalCommandes, string PlatPopulaire) GetStatistiquesGlobales()
+        {
+            int totalUtilisateurs = 0, totalClients = 0, totalCuisiniers = 0, totalCommandes = 0;
+            string platPopulaire = "";
+            Connexion();
+
+            try
+            {
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM identite", connexion))
+                    totalUtilisateurs = Convert.ToInt32(cmd.ExecuteScalar());
+
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM client", connexion))
+                    totalClients = Convert.ToInt32(cmd.ExecuteScalar());
+
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM cuisinier", connexion))
+                    totalCuisiniers = Convert.ToInt32(cmd.ExecuteScalar());
+
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM commande", connexion))
+                    totalCommandes = Convert.ToInt32(cmd.ExecuteScalar());
+
+                using (var cmd = new MySqlCommand(@"
+            SELECT p.Nom 
+            FROM Plat p
+            WHERE p.CommandeID IS NOT NULL
+            GROUP BY p.Nom
+            ORDER BY COUNT(*) DESC
+            LIMIT 1;", connexion))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                        platPopulaire = reader.GetString("Nom");
+                }
+            }
+            finally
+            {
+                FermerConnexion();
+            }
+
+            return (totalUtilisateurs, totalClients, totalCuisiniers, totalCommandes, platPopulaire);
+        }
+
+        /// <summary>
+        /// Clients qui ont plus de 2 commandes (GROUP BY + HAVING)
+        /// </summary>
+        public List<(int ClientID, string Nom, string Prenom, int NbCommandes)> GetClientsAvecPlusDeDeuxCommandes()
+        {
+            var result = new List<(int, string, string, int)>();
+            Connexion();
+            string query = @"
+        SELECT c.ClientID, i.Nom, i.Prenom, COUNT(*) AS NbCommandes
+        FROM Commande c
+        JOIN Identite i ON c.ClientID = i.ID
+        GROUP BY c.ClientID
+        HAVING COUNT(*) > 2;";
+            using (var cmd = new MySqlCommand(query, connexion))
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    result.Add((
+                        reader.GetInt32("ClientID"),
+                        reader.GetString("Nom"),
+                        reader.GetString("Prenom"),
+                        reader.GetInt32("NbCommandes")
+                    ));
+                }
+            }
+            FermerConnexion();
+            return result;
+        }
+
+        /// <summary>
+        /// Les plats qui n'ont jamais été commandés (LEFT JOIN + IS NULL)
+        /// </summary>
+        public List<string> GetPlatsJamaisCommandes()
+        {
+            var result = new List<string>();
+            Connexion();
+            string query = @"
+        SELECT p.Nom
+        FROM Plat p
+        LEFT JOIN Commande c ON p.CommandeID = c.CommandeID
+        WHERE c.CommandeID IS NULL;";
+            using (var cmd = new MySqlCommand(query, connexion))
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    result.Add(reader.GetString("Nom"));
+                }
+            }
+            FermerConnexion();
+            return result;
+        }
+
+        /// <summary>
+        /// Clients dont le nombre de commandes est supérieur à la moyenne (ALL + sous-requête)
+        /// </summary>
+        public List<(int ClientID, string Nom, string Prenom)> GetClientsSuperieursMoyenne()
+        {
+            var result = new List<(int, string, string)>();
+            Connexion();
+            string query = @"
+        SELECT i.ID, i.Nom, i.Prenom
+        FROM Identite i
+        WHERE i.ID IN (
+            SELECT c.ClientID
+            FROM Commande c
+            GROUP BY c.ClientID
+            HAVING COUNT(*) > ALL (
+                SELECT AVG(nb)
+                FROM (
+                    SELECT COUNT(*) AS nb
+                    FROM Commande
+                    GROUP BY ClientID
+                ) AS moyennes
+            )
+        );";
+            using (var cmd = new MySqlCommand(query, connexion))
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    result.Add((
+                        reader.GetInt32("ID"),
+                        reader.GetString("Nom"),
+                        reader.GetString("Prenom")
+                    ));
+                }
+            }
+            FermerConnexion();
+            return result;
+        }
+
+        /// <summary>
+        /// Vérifie si un client donné existe (EXISTS)
+        /// </summary>
+        public bool ExisteClient(int clientId)
+        {
+            Connexion();
+            string query = "SELECT EXISTS (SELECT 1 FROM client WHERE ID = @ID)";
+            using (var cmd = new MySqlCommand(query, connexion))
+            {
+                cmd.Parameters.AddWithValue("@ID", clientId);
+                bool exists = Convert.ToBoolean(cmd.ExecuteScalar());
+                FermerConnexion();
+                return exists;
+            }
+        }
+
+        #endregion
+
 
     }
 }

@@ -94,6 +94,9 @@ namespace ProjetLivInParis
         #endregion
 
         #region algo de graphe
+        /// <summary>
+        /// Applique la coloration de Welsh-Powell sur le graphe.
+        /// </summary>
         public void AppliquerColorationWelshPowell()
         {
             var degres = new Dictionary<Sommet, int>();
@@ -120,6 +123,11 @@ namespace ProjetLivInParis
                 couleurActuelle++;
             }
         }
+        /// <summary>
+        /// Récupère les voisins d'un sommet donné.
+        /// </summary>
+        /// <param name="sommet"></param>
+        /// <returns></returns>
         private List<Sommet> ObtenirVoisins(Sommet sommet)
         {
             var voisins = new List<Sommet>();
