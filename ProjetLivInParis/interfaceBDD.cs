@@ -525,7 +525,45 @@ namespace Project_LivInParis
             FermerConnexion();
             return result;
         }
+        /// <summary>
+        /// Les cuisiniers ayant produit le plus
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetCuisiniersAvecLePlusDePlats()
+        {
+            var result = new List<string>();
+            Connexion();
+            string query = @"
+            SELECT i.Nom, i.Prenom
+            FROM cuisinier c
+            JOIN identite i ON c.ID = i.ID
+            WHERE c.ID IN (
+                SELECT p.CuisinierID
+                FROM plat p
+                GROUP BY p.CuisinierID
+                HAVING SUM(p.Quantite) = (
+                    SELECT MAX(total_quantite)
+                    FROM (
+                        SELECT CuisinierID, SUM(Quantite) as total_quantite
+                        FROM plat
+                        WHERE CuisinierID IS NOT NULL
+                        GROUP BY CuisinierID
+                    ) AS sommes
+                )
+            );";
 
+            using (var cmd = new MySqlCommand(query, connexion))
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string nomComplet = reader.GetString("Nom") + " " + reader.GetString("Prenom");
+                    result.Add(nomComplet);
+                }
+            }
+            FermerConnexion();
+            return result;
+        }
         /// <summary>
         /// Vérifie si un client donné existe (EXISTS)
         /// </summary>

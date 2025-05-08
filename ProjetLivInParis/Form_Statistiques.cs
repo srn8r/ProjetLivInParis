@@ -97,6 +97,19 @@ namespace ProjetLivInParis
                 {
                     lstStats.Items.Add("Tous les plats ont été commandés au moins une fois.");
                 }
+                lstStats.Items.Add(new string('-', 80));
+
+                var meilleurCuisinier = db.GetCuisiniersAvecLePlusDePlats();
+                if (meilleurCuisinier.Count > 0)
+                {
+                    lstStats.Items.Add("Cuisinier ayant préparé le plus de plats:");
+                    foreach (var cuisinier in meilleurCuisinier)
+                        lstStats.Items.Add($"- {cuisinier}");
+                }
+                else
+                {
+                    lstStats.Items.Add("Aucun cuisinier n'a préparé de plats.");
+                }
             }
             catch (Exception ex)
             {
