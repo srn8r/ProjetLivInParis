@@ -16,9 +16,6 @@ namespace ProjetLivInParis
         #region propriétés
 
         private Panel panel1;
-        private Label lblTitre;
-        private Label lblSousTitre;
-        private Button btnInscrire, btnVoirUtilisateurs, btnCommander, btnAfficherGraphe;
 
         private StationManager stationManager;
         private Graphe<Station> graphe;
