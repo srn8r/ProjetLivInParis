@@ -10,7 +10,7 @@ namespace TestLinInParis
         [STAThread]
         static void Main()
         {
-            #region export données de visual studio vers XML (à dé-commenter pour tester)
+            #region export données de visual studio vers XML
             
             ExportXML export = new ExportXML(
                 "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;",
