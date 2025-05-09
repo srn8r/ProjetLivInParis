@@ -11,10 +11,10 @@ namespace TestLinInParis
         static void Main()
         {
             #region export données de visual studio vers XML (à dé-commenter pour tester)
-            /*
+            
             ExportXML export = new ExportXML(
                 "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;",
-                "C:\\ProgramData\\EditiX\\livinparis.xml");
+                "livinparis01.xml");
 
             try
             {
@@ -27,7 +27,7 @@ namespace TestLinInParis
                 MessageBox.Show($"Erreur lors de l'exportation XML: {ex.Message}",
                     "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            */
+            
             #endregion
 
             // To customize application configuration such as set high DPI settings or default font,
