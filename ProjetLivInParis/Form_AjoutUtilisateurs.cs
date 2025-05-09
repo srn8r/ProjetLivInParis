@@ -54,7 +54,8 @@ namespace ProjetLivInParis
 
             Label lblTelephone = new Label() { Text = "Téléphone :", Left = 20, Top = top, Width = labelWidth };
             txtTelephone = new TextBox() { Left = 130, Top = top, Width = 300 };
-            // Ajout d'un placeholder pour le format du téléphone
+
+
             txtTelephone.Text = "10 chiffres (ex: 0123456789)";
             txtTelephone.ForeColor = System.Drawing.Color.Gray;
             txtTelephone.Enter += (s, e) => {
@@ -75,7 +76,8 @@ namespace ProjetLivInParis
 
             Label lblEmail = new Label() { Text = "Email :", Left = 20, Top = top, Width = labelWidth };
             txtEmail = new TextBox() { Left = 130, Top = top, Width = 300 };
-            // Ajout d'un placeholder pour le format de l'email
+
+
             txtEmail.Text = "exemple@domaine.com (pas de majuscules)";
             txtEmail.ForeColor = System.Drawing.Color.Gray;
             txtEmail.Enter += (s, e) => {
