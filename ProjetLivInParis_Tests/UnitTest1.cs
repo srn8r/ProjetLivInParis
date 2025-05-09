@@ -5,7 +5,7 @@ namespace ProjetLivInParis_Tests
         [Fact]
         public void Test1()
         {
-
+            Graphe<Station> graphe = new Graphe<Station>();
         }
     }
 }
