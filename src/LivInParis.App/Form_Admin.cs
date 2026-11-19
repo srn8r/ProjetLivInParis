@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Project_LivInParis;
 
 namespace ProjetLivInParis
 {
@@ -16,7 +15,7 @@ namespace ProjetLivInParis
         #region propriétés
 
         private Label lblTitre;
-        private Button btnVoirUtilisateurs, btnAfficherGraphe, btnVoirCommandes, btnColoration, btnStatistiques;
+        private Button btnVoirUtilisateurs, btnAfficherGraphe, btnVoirCommandes, btnColoration, btnStatistiques, btnExportXml;
 
         #endregion
 
@@ -29,7 +28,7 @@ namespace ProjetLivInParis
             InitializeComponent();
 
             this.Text = "Espace Administrateur";
-            this.Size = new Size(600, 600);
+            this.Size = new Size(600, 640);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.MediumPurple;
             this.Resize += FormAdmin_Resize;
@@ -103,8 +102,7 @@ namespace ProjetLivInParis
             };
             btnColoration.Click += (s, e) =>
             {
-                var graphe = new GrapheCommandes();
-                graphe.CreerDepuisBDD();
+                var graphe = GrapheCommandesBDD.Charger(AppConfig.ConnectionString);
                 graphe.AppliquerColorationWelshPowell();
 
                 var colorationForm = new Form_ColorationGraphe(graphe);
@@ -128,6 +126,45 @@ namespace ProjetLivInParis
                 statsForm.ShowDialog();
             };
             this.Controls.Add(btnStatistiques);
+
+            btnExportXml = new Button
+            {
+                Text = "Exporter en XML",
+                Size = new Size(220, 50),
+                Location = new Point((this.ClientSize.Width - 220) / 2, 470),
+                BackColor = Color.Teal,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 12),
+                Cursor = Cursors.Hand
+            };
+            btnExportXml.Click += BtnExportXml_Click;
+            this.Controls.Add(btnExportXml);
+        }
+
+        /// <summary>
+        /// Exporte le contenu de la base dans un fichier XML choisi par l'administrateur.
+        /// </summary>
+        private void BtnExportXml_Click(object? sender, EventArgs e)
+        {
+            using var dialogue = new SaveFileDialog
+            {
+                Filter = "Fichier XML (*.xml)|*.xml",
+                FileName = "livinparis.xml"
+            };
+            if (dialogue.ShowDialog() != DialogResult.OK)
+                return;
+
+            try
+            {
+                new ExportXML(AppConfig.ConnectionString, dialogue.FileName).ImportDataToXml();
+                MessageBox.Show("Exportation XML terminée avec succès !", "Succès",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de l'exportation XML : {ex.Message}", "Erreur",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         #endregion
 
@@ -145,6 +182,7 @@ namespace ProjetLivInParis
             btnAfficherGraphe.Location = new Point((this.ClientSize.Width - btnAfficherGraphe.Width) / 2, 260);
             btnColoration.Location = new Point((this.ClientSize.Width - btnColoration.Width) / 2, 330);
             btnStatistiques.Location = new Point((this.ClientSize.Width - btnStatistiques.Width) / 2, 400);
+            btnExportXml.Location = new Point((this.ClientSize.Width - btnExportXml.Width) / 2, 470);
         }
         #endregion
     }

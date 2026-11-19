@@ -80,7 +80,7 @@ namespace ProjetLivInParis
         private void ChargerCommandes()
         {
             lvCommandes.Items.Clear();
-            string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+            string connectionString = AppConfig.ConnectionString;
 
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
@@ -128,7 +128,7 @@ namespace ProjetLivInParis
             string nouveauStatut = Prompt.ShowDialog("Modifier le statut :", "Changer Statut", statutActuel);
             if (string.IsNullOrWhiteSpace(nouveauStatut)) return;
 
-            string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+            string connectionString = AppConfig.ConnectionString;
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 conn.Open();

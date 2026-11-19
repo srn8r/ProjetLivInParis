@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
-using Project_LivInParis;
 
 namespace ProjetLivInParis
 {
@@ -17,7 +16,7 @@ namespace ProjetLivInParis
         private Label lblTotal;
         private StationManager stationManager;
         private ContextMenuStrip contextMenu;
-        private string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+        private string connectionString = AppConfig.ConnectionString;
 
         public Form_CommandesClient(int userId)
         {

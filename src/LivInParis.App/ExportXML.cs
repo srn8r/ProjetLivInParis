@@ -74,7 +74,7 @@ namespace ProjetLivInParis
 
         private void ImportIdentites(MySqlConnection connection, XmlDocument xmlDoc, XmlElement parentElement)
         {
-            string query = "SELECT ID, Nom, Prenom, Adresse, Telephone, Email, MotDePasse FROM identite";
+            string query = "SELECT ID, Nom, Prenom, Adresse, Telephone, Email FROM identite";
             using (MySqlCommand command = new MySqlCommand(query, connection))
             {
                 using (MySqlDataReader reader = command.ExecuteReader())
@@ -106,10 +106,6 @@ namespace ProjetLivInParis
                         XmlElement emailElement = xmlDoc.CreateElement("Email");
                         emailElement.InnerText = reader["Email"].ToString();
                         identiteElement.AppendChild(emailElement);
-
-                        XmlElement motDePasseElement = xmlDoc.CreateElement("MotDePasse");
-                        motDePasseElement.InnerText = reader["MotDePasse"].ToString();
-                        identiteElement.AppendChild(motDePasseElement);
 
                         parentElement.AppendChild(identiteElement);
                     }

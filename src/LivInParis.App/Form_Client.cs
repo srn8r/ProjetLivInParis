@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
-using Project_LivInParis; 
 
 namespace ProjetLivInParis
 {
@@ -26,7 +25,7 @@ namespace ProjetLivInParis
         private StationManager stationManager;
         private Dictionary<string, int> tempsTrajets = new Dictionary<string, int>();
         private Dictionary<string, PlatInfo> informationsPlats = new Dictionary<string, PlatInfo>();
-        private string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+        private string connectionString = AppConfig.ConnectionString;
         private Label lblBienvenue;
 
         private class PlatInfo

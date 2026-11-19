@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Project_LivInParis;
 
 namespace ProjetLivInParis
 {
@@ -213,7 +212,7 @@ namespace ProjetLivInParis
         /// <param name="e"></param>
         private void FormGraphe_Load(object sender, EventArgs e)
         {
-            string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+            string connectionString = AppConfig.ConnectionString;
             stationManager = new StationManager(connectionString);
             stationManager.ChargerStationsDepuisBDD();
             stationManager.LierCorrespondances();
@@ -384,14 +383,8 @@ namespace ProjetLivInParis
                         }
                         else if (algoSelector.SelectedItem.ToString() == "Bellman-Ford")
                         {
-                            var (distances, previous) = graphe.BellmanFord(n1);
-                            chemin = new List<Noeud<Station>>();
-                            var current = n2;
-                            while (current != null)
-                            {
-                                chemin.Insert(0, current);
-                                current = previous[current];
-                            }
+                            var (_, previous) = graphe.BellmanFord(n1);
+                            chemin = Graphe<Station>.Reconstruire(previous, n1, n2);
                         }
                         else if (algoSelector.SelectedItem.ToString() == "Floyd-Warshall")
                         {

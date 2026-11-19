@@ -234,7 +234,7 @@ namespace ProjetLivInParis
         {
             try
             {
-                string connStr = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+                string connStr = AppConfig.ConnectionString;
                 using (MySqlConnection conn = new MySqlConnection(connStr))
                 {
                     conn.Open();
@@ -274,7 +274,7 @@ namespace ProjetLivInParis
 
             try
             {
-                string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+                string connectionString = AppConfig.ConnectionString;
                 using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
                     conn.Open();

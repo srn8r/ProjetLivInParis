@@ -93,24 +93,34 @@ namespace ProjetLivInParis
 
             try
             {
-                string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+                string connectionString = AppConfig.ConnectionString;
                 using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
                     conn.Open();
-                    string query = "SELECT ID, Prenom FROM identite WHERE Email = @Email AND MotDePasse = @MotDePasse";
+                    string query = "SELECT ID, Prenom, MotDePasse FROM identite WHERE Email = @Email";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@Email", email);
-                        cmd.Parameters.AddWithValue("@MotDePasse", password);
 
                         using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
-                            if (reader.Read())
+                            bool trouve = reader.Read();
+                            bool doitEtreRehache = false;
+                            if (trouve && PasswordHasher.Verifier(password, reader.GetString("MotDePasse"), out doitEtreRehache))
                             {
                                 int userId = reader.GetInt32("ID");
                                 string prenom = reader.GetString("Prenom");
 
                                 reader.Close();
+
+                                // Ancien compte au mot de passe en clair : on le remplace par un hash.
+                                if (doitEtreRehache)
+                                {
+                                    using var cmdHash = new MySqlCommand("UPDATE identite SET MotDePasse = @Hash WHERE ID = @ID", conn);
+                                    cmdHash.Parameters.AddWithValue("@Hash", PasswordHasher.Hacher(password));
+                                    cmdHash.Parameters.AddWithValue("@ID", userId);
+                                    cmdHash.ExecuteNonQuery();
+                                }
 
                                 bool estClient = false;
                                 string queryClient = "SELECT COUNT(*) FROM client WHERE ID = @ID";

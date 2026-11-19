@@ -1,4 +1,4 @@
-﻿namespace TestLinInParis
+﻿namespace ProjetLivInParis
 {
     partial class Form_Accueil
     {

@@ -1,4 +1,4 @@
-﻿using Project_LivInParis;
+﻿
 using System.Data;
 
 namespace ProjetLivInParis
@@ -184,7 +184,7 @@ namespace ProjetLivInParis
                     item.SubItems.Add(user.Adresse);  
                     string type = user is Client ? "Client" : user is Cuisinier ? "Cuisinier" : "N/A";
                     item.SubItems.Add(type);
-                    item.SubItems.Add(user.MotDePasse);
+                    item.SubItems.Add("••••••••");
 
                     lvUtilisateurs.Items.Add(item);
                 }
@@ -230,7 +230,7 @@ namespace ProjetLivInParis
             txtEmail.Text = item.SubItems[3].Text;
             txtTel.Text = item.SubItems[4].Text;
             txtAdresse.Text = item.SubItems[5].Text;
-            txtMdp.Text = item.SubItems[7].Text;
+            txtMdp.Text = ""; // laisser vide pour ne pas changer le mot de passe
         }
         /// <summary>
         /// Gère l'événement de clic sur le bouton "Supprimer". Supprime l'utilisateur sélectionné.

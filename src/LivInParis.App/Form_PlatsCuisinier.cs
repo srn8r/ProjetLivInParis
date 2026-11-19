@@ -67,7 +67,7 @@ namespace ProjetLivInParis
         private void ChargerPlats()
         {
             lvPlats.Items.Clear();
-            string connectionString = "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+            string connectionString = AppConfig.ConnectionString;
 
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {

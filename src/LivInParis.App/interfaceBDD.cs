@@ -2,10 +2,9 @@
 using System.Data;
 using MySql.Data.MySqlClient;
 using MySqlX.XDevAPI;
-using ProjetLivInParis;
 using Client = ProjetLivInParis.Client;
 
-namespace Project_LivInParis
+namespace ProjetLivInParis
 {
     public class InterfaceBDD
     {
@@ -14,7 +13,7 @@ namespace Project_LivInParis
         private MySqlConnection connexion;
 
         private readonly string connectionString =
-            "SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;";
+            AppConfig.ConnectionString;
 
         public void Connexion()
         {
@@ -235,7 +234,7 @@ namespace Project_LivInParis
             cmd.Parameters.AddWithValue("@Adresse", adresse);
             cmd.Parameters.AddWithValue("@Telephone", telephone);
             cmd.Parameters.AddWithValue("@Email", email);
-            cmd.Parameters.AddWithValue("@MotDePasse", motDePasse);
+            cmd.Parameters.AddWithValue("@MotDePasse", PasswordHasher.Hacher(motDePasse));
 
             int insertedId = Convert.ToInt32(cmd.ExecuteScalar());
             return insertedId;
@@ -400,7 +399,7 @@ namespace Project_LivInParis
                         Email = @Email,
                         Telephone = @Telephone,
                         Adresse = @Adresse,
-                        MotDePasse = @MotDePasse
+                        MotDePasse = COALESCE(@MotDePasse, MotDePasse)
                     WHERE ID = @ID";
 
                     cmd.Parameters.AddWithValue("@Nom", user.Nom);
@@ -408,7 +407,9 @@ namespace Project_LivInParis
                     cmd.Parameters.AddWithValue("@Email", user.Email);
                     cmd.Parameters.AddWithValue("@Telephone", user.Telephone);
                     cmd.Parameters.AddWithValue("@Adresse", user.Adresse);
-                    cmd.Parameters.AddWithValue("@MotDePasse", user.MotDePasse);
+                    // Champ vide = mot de passe inchangé ; sinon on enregistre le nouveau, haché.
+                    cmd.Parameters.AddWithValue("@MotDePasse",
+                        string.IsNullOrWhiteSpace(user.MotDePasse) ? DBNull.Value : PasswordHasher.Hacher(user.MotDePasse));
                     cmd.Parameters.AddWithValue("@ID", user.ID);
 
                     int rows = cmd.ExecuteNonQuery();

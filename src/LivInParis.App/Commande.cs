@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Project_LivInParis
+namespace ProjetLivInParis
 {
     /// <summary>
     /// Classe représentant une commande dans le système de gestion de commandes.

@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Project_LivInParis;
-using ProjetLivInParis;
 
 
-namespace TestLinInParis
+namespace ProjetLivInParis
 {
     public partial class Form_Accueil : Form
     {
-        #region propriétés
+        #region propriÃ©tÃ©s
 
         private Label lblTitre;
         private Label lblSousTitre;
@@ -88,7 +86,7 @@ namespace TestLinInParis
 
         #region resize
         /// <summary>
-        /// Gère l'événement Resize du formulaire.
+        /// GÃ¨re l'Ã©vÃ©nement Resize du formulaire.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>

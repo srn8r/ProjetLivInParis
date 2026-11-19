@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Project_LivInParis;
 
 namespace ProjetLivInParis
 {
@@ -26,7 +25,7 @@ namespace ProjetLivInParis
             this.StartPosition = FormStartPosition.CenterScreen;
 
 
-            stationManager = new StationManager("SERVER=127.0.0.1;PORT=3306;DATABASE=livinparis;UID=root;PASSWORD=root;"); 
+            stationManager = new StationManager(AppConfig.ConnectionString); 
             stationManager.ChargerStationsDepuisBDD();
 
             InitialiserComposants();
