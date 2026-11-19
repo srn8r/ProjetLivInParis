@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  core-tests:
+    name: Core library tests (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet test tests/LivInParis.Core.Tests --configuration Release
+
+  app-build:
+    name: Full solution build (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet build LivInParis.sln --configuration Release
+      - run: dotnet test LivInParis.sln --configuration Release --no-build
+
+  database:
+    name: SQL schema and demo data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load schema and seed into the runner's MySQL
+        run: |
+          sudo systemctl start mysql.service
+          mysql -uroot -proot < database/schema.sql
+          mysql -uroot -proot < database/seed.sql
+          mysql -uroot -proot livinparis -e "SELECT COUNT(*) AS stations FROM metroParis; SELECT COUNT(*) AS users FROM identite;"

@@ -1,0 +1,193 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Microsoft.VisualBasic.ApplicationServices;
+using MySql.Data.MySqlClient;
+
+
+namespace ProjetLivInParis
+{
+    public partial class Form_Connecter : Form
+    {
+        private TextBox txtEmail;
+        private TextBox txtPassword;
+        private Button btnConnexion;
+        private Label lblTitre;
+
+        public Form_Connecter()
+        {
+            InitializeComponent();
+            this.Text = "Connexion";
+            this.Size = new Size(400, 350);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.BackColor = Color.MediumPurple;
+
+            lblTitre = new Label
+            {
+                Text = "Connexion",
+                Font = new Font("Segoe UI", 20, FontStyle.Bold),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point((this.ClientSize.Width - 200) / 2, 30)
+            };
+            this.Controls.Add(lblTitre);
+
+            txtEmail = new TextBox
+            {
+                PlaceholderText = "Email",
+                Width = 250,
+                Location = new Point((this.ClientSize.Width - 250) / 2, 100)
+            };
+            this.Controls.Add(txtEmail);
+
+            txtPassword = new TextBox
+            {
+                PlaceholderText = "Mot de passe",
+                Width = 250,
+                UseSystemPasswordChar = true,
+                Location = new Point((this.ClientSize.Width - 250) / 2, 150)
+            };
+            this.Controls.Add(txtPassword);
+
+            btnConnexion = new Button
+            {
+                Text = "Se connecter",
+                Width = 150,
+                Height = 40,
+                Location = new Point((this.ClientSize.Width - 150) / 2, 230),
+                BackColor = Color.DarkSlateBlue,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10)
+            };
+            btnConnexion.Click += BtnConnexion_Click;
+            this.Controls.Add(btnConnexion);
+
+            CheckBox cbAfficherMotDePasse = new CheckBox
+            {
+                Text = "Afficher le mot de passe",
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(txtPassword.Left, txtPassword.Top + 35)
+            };
+            cbAfficherMotDePasse.CheckedChanged += CbAfficherMotDePasse_CheckedChanged;
+            this.Controls.Add(cbAfficherMotDePasse);
+
+        }
+
+        private void BtnConnexion_Click(object sender, EventArgs e)
+        {
+            string email = txtEmail.Text.Trim();
+            string password = txtPassword.Text.Trim();
+
+            if (email == "" || password == "")
+            {
+                MessageBox.Show("Veuillez remplir tous les champs.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+                string connectionString = AppConfig.ConnectionString;
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "SELECT ID, Prenom, MotDePasse FROM identite WHERE Email = @Email";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Email", email);
+
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            bool trouve = reader.Read();
+                            bool doitEtreRehache = false;
+                            if (trouve && PasswordHasher.Verifier(password, reader.GetString("MotDePasse"), out doitEtreRehache))
+                            {
+                                int userId = reader.GetInt32("ID");
+                                string prenom = reader.GetString("Prenom");
+
+                                reader.Close();
+
+                                // Ancien compte au mot de passe en clair : on le remplace par un hash.
+                                if (doitEtreRehache)
+                                {
+                                    using var cmdHash = new MySqlCommand("UPDATE identite SET MotDePasse = @Hash WHERE ID = @ID", conn);
+                                    cmdHash.Parameters.AddWithValue("@Hash", PasswordHasher.Hacher(password));
+                                    cmdHash.Parameters.AddWithValue("@ID", userId);
+                                    cmdHash.ExecuteNonQuery();
+                                }
+
+                                bool estClient = false;
+                                string queryClient = "SELECT COUNT(*) FROM client WHERE ID = @ID";
+                                using (MySqlCommand cmdClient = new MySqlCommand(queryClient, conn))
+                                {
+                                    cmdClient.Parameters.AddWithValue("@ID", userId);
+                                    estClient = Convert.ToInt32(cmdClient.ExecuteScalar()) > 0;
+                                }
+
+                                bool estCuisinier = false;
+                                string queryCuisinier = "SELECT COUNT(*) FROM cuisinier WHERE ID = @ID";
+                                using (MySqlCommand cmdCuisinier = new MySqlCommand(queryCuisinier, conn))
+                                {
+                                    cmdCuisinier.Parameters.AddWithValue("@ID", userId);
+                                    estCuisinier = Convert.ToInt32(cmdCuisinier.ExecuteScalar()) > 0;
+                                }
+
+                                if (estClient && estCuisinier)
+                                {
+                                    MessageBox.Show($"Bienvenue {prenom} ! Vous êtes client et cuisinier.");
+                                    new Form_Choix(userId).ShowDialog();
+                                }
+                                else if (estClient)
+                                {
+                                    MessageBox.Show($"Bienvenue {prenom} ! (Client)");
+                                    new Form_Client(userId).ShowDialog();
+                                }
+                                else if (estCuisinier)
+                                {
+                                    MessageBox.Show($"Bienvenue {prenom} ! (Cuisinier)");
+                                    new Form_Cuisinier(userId).ShowDialog();
+                                }
+
+                                else
+                                {
+                                    new Form_ChoixRole(userId, prenom).ShowDialog();
+                                }
+
+                                this.Close();
+                            }
+
+                            else
+                            {
+                                MessageBox.Show("Email ou mot de passe incorrect.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur lors de la connexion à la base de données : " + ex.Message, "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        /// <summary>
+        /// Gère l'événement de changement d'état de la case à cocher pour afficher ou masquer le mot de passe.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CbAfficherMotDePasse_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox checkBox = sender as CheckBox;
+            if (checkBox != null)
+            {
+                txtPassword.UseSystemPasswordChar = !checkBox.Checked;
+            }
+        }
+
+    }
+}
